@@ -3,13 +3,14 @@ NAME
 
 SYNOPSIS
       # to use:
-      # install the TradeSpring branch of Finance::GeniusTrade from
+      # install the TradeSpring branch of Finance::GeniusTrader from
       # http://github.com/TradeSpring/Finance-Geniustrader
       # install TradeSpring and TradeSpring::Broker from http://github.com/TradeSpring
 
+      # cpanm --installdeps . && make buildjs
       # setup your gt database and configure etc/site_chart.conf (see etc/chart.conf for example)
 
-      % plackup -p 3997
+      % plackup -Ilib -p 3997
       # visit http://localhost:3997/
 
 AUTHOR
