@@ -1,0 +1,191 @@
+% my $k = $key ~ "/" ~ $tf;
+% my $debug = $req["parameters"]["mixed"]["debug"];
+% my $jsurl = $debug ? nil : $env['psgix.jsconcat.url']
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title><% block title -> { %>TradeSpring::Chart for <%= $code %><%} %></title>
+% if ($jsurl) {
+<script src="<%= $jsurl %>" type="text/javascript"></script>
+% } else {
+% for $js_files -> $jsfile {
+<script src="/static/<% $jsfile %>"></script>
+% }
+% }
+
+<link rel="stylesheet" href="/static/screen.css" type="text/css" />
+% block css -> {
+<link rel="stylesheet" href="/static/tschart.css" type="text/css" />
+<link href="/static/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+% }
+
+<script type="text/javascript">
+var view, hpipe;
+var trlayout;
+var items = 600;
+
+
+$(function() {
+    hpipe  = new Hippie.Pipe();
+    var ind_handlers = {};
+
+    function init_view(items, cnt) {
+        var width = $('.ui-layout-center').width() - 130;
+        view = new TradeSpring.Chart({ holder: jQuery('#holder'), x: 10, y: 10, width: width, height: 600,
+                                       code: '<%= $code %>', tf: '<%= $tf %>', tz: '<%= $tz %>',
+                                       items_to_load: items, cnt: cnt});
+
+% block init_chart -> {
+        var zone  = view.new_zone({ y:  0,  height: 420});
+        var zone2 = view.new_zone({ y: 430, height: 70});
+
+        ind_handlers['SMA(9)'] = mk_curve(zone, 'orange', 'SMA(9)');
+        ind_handlers['SMA(22)'] = mk_curve(zone, 'blue', 'SMA(22)');
+        ind_handlers['SMA(60)'] = mk_curve(zone, 'purple', 'SMA(60)');
+        ind_handlers['BOL']    = mk_band(zone, '#a0a000', 'BOL');
+%}
+
+        $(window).resize(function() {
+            view.width = $(this).width() - 130;
+            view.init_width();
+        }).resize();
+    }
+
+    TradeSpring.ChartUI.init_connection_status(hpipe);
+
+    $(hpipe)
+        .bind("message.tsstream.error", function(e, d) {
+            alert(d.error);
+        })
+        .bind("message.tsstream.sessionend", function(e, d) {
+            alert("session ended");
+        })
+        .bind("message.tsstream.prices", function(e, d) {
+            view.candle_zone.render_candle(d.prices, d.start);
+            view.candle_zone.render_ylabels();
+            var vols = jQuery(d.prices).map(function() { return this[5] }).get();
+            var c = jQuery(d.prices).map(function() {
+                return (this[OPEN] < this[CLOSE] ? 'red' : 'green')
+            }).get();
+            view.volume_zone.render_bar(vols, d.start, c, 'Vol');
+
+            view.init_columns();
+            TradeSpring.ChartUI.init_live_events(view, hpipe, $('#header'));
+
+        })
+        .bind("message.tsstream.ivals", function(e, d) {
+            ind_handlers[d.name].init(d);
+        })
+        .bind("message.tsstream.ival", function(e, d) {
+            ind_handlers[d.name].val(d);
+        })
+        .bind("message.tsstream.init", function(e, d) {
+            init_view(Math.min(d.count, items), d.count);
+            TradeSpring.ChartUI.init(view, d, $('#header'));
+            hpipe.send({ type: 'tsstream.indicators',
+                         indicators: [<% block indicators -> {%>'SMA(9)'<% } %>]
+                       });
+
+            $('#header .session-name').text(d.session);
+            hpipe.send({ type: 'tsstream.history',
+                         start: view.loaded_offset,
+                         end: d.count-1
+                       });
+        })
+        .bind("ready",
+              function(e, data) {
+                  hpipe.send({ type: 'tsstream.subscribe',
+                               session: '<%= $k %>'
+                             });
+              });
+
+    hpipe.init();
+
+
+$('#print').toggle(function() {
+    $('path.candleup').css({'stroke': 'black', 'fill': 'white', 'stroke-width': 0.5});
+    $('rect.candleup').css({'stroke': 'black', 'fill': 'white', 'stroke-width': 0.5});
+    $('path.candledown').css({'stroke': 'black', 'fill': 'black', 'stroke-width': 0.5});
+    $('rect.candledown').css({'stroke': 'black', 'fill': 'black', 'stroke-width': 0.5});
+},function() {
+    $('path.candleup').css({'stroke': 'red', 'fill': 'red'});
+    $('rect.candleup').css({'stroke': 'red', 'fill': 'red'});
+    $('path.candledown').css({'stroke': 'green', 'fill': 'green'});
+    $('rect.candledown').css({'stroke': 'green', 'fill': 'green'});
+
+});
+
+    var bars_per_day = 150;
+$('#go').click(function() {
+    var date = $('#date').val();
+    hpipe.send({ type: 'tsstream.resolve', date: date });
+    $(hpipe).bind('message.tsstream.date', function(e, d) {
+        $(hpipe).unbind(e);
+        var i = parseInt(d.i);
+        console.log(d);
+        console.log(date, "resolved to", i);
+//        if (i >= view.loaded_offset && i < view.loaded_offset + view.loaded_nb_items) {
+//            view.offset = i - view.nb_items() + 60;
+//            view.canvas.css('left', (view.loaded_offset + view.loaded_nb_items - view.offset)*view.current_zoom-view.canvas_width*view.current_zoom/10);
+//        }
+//        else {
+        var cb = $.map(view.zones,
+                       function(z) { return z.reset() });
+        var start = i+bars_per_day-items;
+        console.log("start: ", start);
+        view.loaded_offset = start;
+        view.offset = view.loaded_offset + items - view.nb_items();
+        hpipe.send({ type: 'tsstream.history',
+                     start: view.loaded_offset,
+                     end: view.loaded_offset+items-1
+                   });
+        $.each(cb, function() { this() });
+    });
+});
+
+
+});
+
+
+</script>
+</head>
+<body>
+% block header -> {
+<div id="header">
+<span class="session-name"></span>
+<span class="datetime"></span>
+<span>P:</span>
+<span class="price prev"></span>
+<span>H:</span>
+<span class="price high"></span>
+<span>L:</span>
+<span class="price low"></span>
+<span>C:</span>
+<span class="price current"></span>
+<span class="price change"></span>
+<span>V:</span>
+<span class="price volume"></span>
+</div>
+
+<div id="connection-status" class="disconnected">
+Connecting...
+</div>
+% }
+
+
+% block holder -> {
+<div id="holder"></div>
+<input id="left" type="button" value="<<">
+<input id="right" type="button" value=">>">
+<input id="zoomin" type="button" value="++">
+<input id="zoomout" type="button" value="--">
+<input id="info-left" type="button" value="info-left">
+<input id="info-right" type="button" value="info-right">
+<input id="print" type="button" value="print">
+<input id="date" type="date">
+<input id="go" type="button" value="go">
+<input id="end" type="button" value=">>>>|">
+% }
+
+</body>
+</html>

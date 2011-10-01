@@ -1,0 +1,33 @@
+NAME
+    TradeSpring::Chart - raphaeljs-based charting for TradeSpring
+
+SYNOPSIS
+      # to use:
+      # install the TradeSpring branch of Finance::GeniusTrade from
+      # http://github.com/TradeSpring/Finance-Geniustrader
+      # install TradeSpring and TradeSpring::Broker from http://github.com/TradeSpring
+
+      # setup your gt database and configure etc/site_chart.conf (see etc/chart.conf for example)
+
+      % plackup -p 3997
+      # visit http://localhost:3997/
+
+AUTHOR
+    Chia-liang Kao, "<clkao at clkao.org>"
+
+BUGS
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc TradeSpring::Chart
+
+ACKNOWLEDGEMENTS
+COPYRIGHT & LICENSE
+    Copyright 2009-2011 Chia-liang Kao.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the terms of either: the GNU General Public License as published
+    by the Free Software Foundation; or the Artistic License.
+
+    See http://dev.perl.org/licenses/ for more information.
+

@@ -1,0 +1,64 @@
+%# my $code; # XXX
+<html>
+<head>
+<title><% block title -> { %>TradeSpring::Chart<% }%></title>
+<link rel="stylesheet" href="/static/screen.css" type="text/css" />
+<style type="text/css" media="screen">
+<% block css -> { '' } %>
+</style>
+
+</head>
+<body>
+
+<% block prefix -> {%>
+<h1>TradeSpring::Chart</h1>
+<% } %>
+
+<dl>
+% for $sessions.keys() -> $code {
+% my $code_sessions = $sessions[$code]
+<dt><% $code %>
+%   for $code_sessions.keys() -> $key {
+%     my $session = $code_sessions[$key].session
+<dd>
+<span><%= $session.key %></span>
+
+% for $session.ag.keys() -> $tf {
+<a href="/session/<%= $session.key %>/<%= $tf %>"><%= $tf %></a>
+% }
+% if ($session.starting) {
+% my $delay = $session.starting - $time();
+% if ($delay > 0) {
+<span>starting in: <%= $delay %> seconds</span>
+% }
+% }
+% if ($key == "history/"~$code) {
+% block sim -> {
+Start a simulation session:
+<form action="/admin/pubsim" method="POST">
+<div>
+<input type="hidden" name="item" value="sim">
+<input type="hidden" name="code" value="<%= $code %>">
+Date: <input type="date" name="date" min="2010-01-01" placeholder="YYYY-MM-DD" required ><br>
+Speed:(slow)<input type="range" name="speed" step="1" min="1" max="100" value="30">(fast)<br>
+Starts after:<input name="delay" value="60" size="3">(seconds)<br>
+<input id="reqsim" type="submit" value="go">
+
+</div>
+</form>
+% }
+
+% } # end if
+</dd>
+% } # end for
+</dt>
+% }
+</dl>
+
+<hr />
+
+
+</body>
+
+</html>
+
