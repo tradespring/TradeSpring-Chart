@@ -26,6 +26,12 @@ class TradeSpring.ChartUI
         ).mouseup ->
           scrolling = false
 
+        $('#info-left').click(->
+          $('.infobox').css({right: '', left:'10px'}))
+
+        $('#info-right').click(->
+          $('.infobox').css({left: '', right:'10px'}))
+
         last_x = undefined
         last_center = undefined
         view.chart_view.mousewheel (ev, delta) ->
