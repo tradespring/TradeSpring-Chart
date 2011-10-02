@@ -23,6 +23,7 @@ method BUILD {
         ag => {},
         key => "history/".$self->code,
         ready => $ready,
+        supports_sim => exists $self->chart->config->{history}{$self->code}{sim},
         code => $self->code,
     };
 

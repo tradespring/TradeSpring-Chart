@@ -32,7 +32,7 @@
 <span>starting in: <%= $delay %> seconds</span>
 % }
 % }
-% if ($key == "history/"~$code) {
+% if ($key == "history/"~$code && $session.supports_sim) {
 % block sim -> {
 Start a simulation session:
 <form action="/admin/pubsim" method="POST">
