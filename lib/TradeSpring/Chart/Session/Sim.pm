@@ -4,6 +4,7 @@ use methods;
 use 5.10.1;
 use Finance::GeniusTrader::Prices;
 use Finance::TW::TAIFEX;
+use DateTime::Format::Strptime;
 
 extends 'TradeSpring::Chart::Session';
 
@@ -98,9 +99,7 @@ my $smap = {
     'day'     => [0],
 };
 
-sub init_simcalc_tf {
-    my ($self, $sim, $data, $calc, $tf, $skey, $ready) = @_;
-
+method init_simcalc_tf($sim, $data, $calc, $tf, $skey, $ready) {
     ($calc) = $self->history->splice_calc($calc, 60 * 10, $self->date);
 
     my $topic = $self->bus->topic({ name => "$skey/$tf", recycle => 0 });

@@ -1,11 +1,11 @@
 package TradeSpring::Chart::View;
 use strict;
+use methods;
 
 use Finance::GeniusTrader::Prices;
 use Finance::GeniusTrader::Eval;
 
-sub init_message {
-    my $self = shift;
+method init_message {
     my $cnt = $self->{calc}->prices->count;
     return { type      => 'tsstream.init',
              start_price => $self->{start_price},
@@ -18,8 +18,7 @@ sub init_message {
            };
 }
 
-sub subscribe_indicator {
-    my ($self, $sub, $name) = @_;
+method subscribe_indicator($sub, $name) {
     my $i = $self->{indicators}{indicators}{$name};
     unless ($i) {
         warn "==> indicator $name not found";
@@ -29,8 +28,7 @@ sub subscribe_indicator {
     return 1;
 }
 
-sub send_history {
-    my ($self, $start, $end) = @_;
+method send_history($start, $end) {
     $start = 0 if $start < 0;
     return { type   => 'tsstream.prices',
              start  => int($start),
@@ -39,9 +37,7 @@ sub send_history {
          };
 }
 
-sub send_history_indicator {
-    my ($self, $name, $start, $end) = @_;
-
+method send_history_indicator($name, $start, $end) {
     my $values = $self->{indicators}->get_values($name, $start, $end);
     # XXX: handle error
     return { type   => 'tsstream.ivals',
@@ -51,14 +47,12 @@ sub send_history_indicator {
          }
 }
 
-sub resolve_date {
-    my ($self, $date) = @_;
+method resolve_date($date) {
     my $calc = $self->{calc};
     return $calc->prices->date($calc->prices->find_nearest_following_date($date));
 }
 
-sub DESTROY {
-    my $self = shift;
+method DESTROY {
     warn "destory view $self->{name}";
 }
 

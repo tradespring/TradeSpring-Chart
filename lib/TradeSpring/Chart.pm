@@ -7,7 +7,6 @@ use Try::Tiny;
 use AnyMQ;
 use Text::Xslate;
 use UNIVERSAL::require;
-use DateTime::Format::Strptime;
 use Log::Log4perl;
 use File::ShareDir;
 use Encode qw(encode_utf8);
@@ -21,15 +20,7 @@ has bus => (is => "rw");
 has mtf => (is => "rw", handles => ['render']);
 has sessions => (is => "rw", isa => "HashRef", default => sub { {} });
 
-my $Strp = DateTime::Format::Strptime->new(
-    pattern         => '%F %T',
-    time_zone       => 'Asia/Taipei',
-    on_error        => 'croak',
-);
-
-sub init_logging {
-    my ($class, $logconf) = @_;
-
+method init_logging($class: $logconf) {
     if (-e $logconf) {
         Log::Log4perl::init_and_watch($logconf, 60);
     }
@@ -68,7 +59,7 @@ method template_dir {
     $self->share_dir .'/templates';
 }
 
-sub static_files_app {
+method static_files_app {
     map {
         $_->require;
         $_->new;
@@ -89,7 +80,7 @@ method js_files_path {
     } $self->static_files_app;
 }
 
-sub js_files {
+method js_files {
     map { $_->files } qw(TradeSpring::Chart::JSFiles Web::Hippie::App::JSFiles)
 }
 
@@ -388,8 +379,7 @@ sub config {
 }
 
 
-sub init_history {
-    my $self = shift;
+method init_history {
     my $config = $self->config->{history};
     for my $code ( keys %$config) {
         my $entry = $config->{$code};
@@ -404,8 +394,7 @@ sub init_history {
     }
 }
 
-sub init_live {
-    my ($self, $bus, $source) = @_;
+method init_live ($bus, $source) {
     my $config = $self->config->{livechart};
 
     my $cfg = $self->config->{bus};
@@ -430,24 +419,20 @@ sub init_live {
     }
 }
 
-sub mk_broker {
-    my $self = shift;
-
-    use TradeSpring::Broker::Local;
+method mk_broker {
+    require TradeSpring::Broker::Local;
     my $broker = TradeSpring::Broker::Local->new_with_traits
         (traits => ['Stop', 'Update', 'Attached', 'OCA']);
 }
 
-sub new_session {
-    my ($self, $session_spec, $bus, $sub, $user_id) = @_;
+method new_session($session_spec, $bus, $sub, $user_id) {
     my ($key, $code, $tf) = $session_spec =~ m|^(.*?)/([^/]+)/(\w+)$|;
 
     my ($skey, $session) = $self->session_from_key($key, $code) or return;
     return $self->view_from_session($skey, $session, $tf, $bus, $sub, $user_id);
 }
 
-sub session_from_key {
-    my ($self, $key, $code) = @_;
+method session_from_key($key, $code) {
     if (my $code_sessions = $self->sessions->{$code}) {
         my $keycode = "$key/$code";
         return ($keycode, $code_sessions->{$keycode}->session)
@@ -457,8 +442,7 @@ sub session_from_key {
     return;
 }
 
-sub create_sim_session {
-    my ($self, $bus, $date, $code, $speed, $delay, $uniq) = @_;
+method create_sim_session($bus, $date, $code, $speed, $delay, $uniq) {
     my $h = $self->sessions->{$code}{"history/$code"} or return;
     require TradeSpring::Chart::Session::Sim;
     my $sim = eval { TradeSpring::Chart::Session::Sim->new( code => $code, tf => [],
@@ -479,8 +463,7 @@ sub create_sim_session {
     return $sim;
 }
 
-sub view_from_session {
-    my ($self, $skey, $spec, $tf, $bus, $sub, $user_id) = @_;
+method view_from_session($skey, $spec, $tf, $bus, $sub, $user_id) {
 
     die "tf '$tf' not available for $skey" unless exists $spec->{ag}{$tf};
     if ($spec->{source} && $user_id && !$spec->{brokers}{$user_id}) {
@@ -512,6 +495,7 @@ sub view_from_session {
 __PACKAGE__->meta->make_immutable;
 no Moose;
 1;
+
 =head1 NAME
 
 TradeSpring::Chart - raphaeljs-based charting for TradeSpring

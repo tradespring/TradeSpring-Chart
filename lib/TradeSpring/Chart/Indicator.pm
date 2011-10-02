@@ -1,7 +1,10 @@
 package TradeSpring::Chart::Indicator;
+use methods;
 use Moose;
 use Finance::GeniusTrader::Prices;
 use Finance::GeniusTrader::Eval;
+use TradeSpring::IManager::Cache;
+use TradeSpring::Frame;
 use Set::IntSpan;
 
 has calc => (is => "ro");
@@ -24,29 +27,18 @@ has tsloader => (
 
 has default_prefix => (is => "rw", isa => "Str", default => sub { "TradeSpring::I::" });
 
-sub _build_tsloader {
-    my $self = shift;
+method _build_tsloader {
     my $config = TradeSpring::Chart->config;
     TradeSpring::IManager::Cache->new( frame => $self->tsindicator_frame,
                                        %{ $config->{cache_redis} || {}}
                                    );
 }
 
-sub _build_tsindicator_frame {
-    my $self = shift;
+method _build_tsindicator_frame {
     TradeSpring::Frame->new( calc => $self->calc );
 }
 
-use TradeSpring::IManager::Cache;
-use TradeSpring::Frame;
-
-sub BUILD {
-
-}
-
-sub init {
-    my ($self, $spec) = @_;
-
+method init($spec) {
     for my $name (keys %$spec) {
         $self->cv->begin;
         my $entry = $spec->{$name};
@@ -72,8 +64,7 @@ sub init {
     }
 }
 
-sub populate_tsindicator2 {
-    my ($self, $start, $end) = @_;
+method populate_tsindicator2($start, $end) {
     for my $i ($start..$end) {
         $self->tsindicator_frame->i($i);
         for (@{ $self->tsloader->order }) {
@@ -82,8 +73,7 @@ sub populate_tsindicator2 {
     }
 }
 
-sub indicator_pub {
-    my $self = shift;
+method indicator_pub {
     my $calc = $self->calc;
     my $id = $self->indicators;
     sub {
@@ -114,8 +104,7 @@ sub indicator_pub {
     }
 }
 
-sub get_values {
-    my ($self, $name, $start, $end) = @_;
+method get_values($name, $start, $end) {
     my $ix = $self->indicators->{$name};
     my $object_name = $ix->{name} or return ;
 
@@ -128,9 +117,8 @@ sub get_values {
     return [ map { my @val = @{$ix->{tsind}->cache->{$_}}[@$arg_spec]; $#val ? \@val : $val[0] } ($start..$end) ];
 }
 
-sub get_tsindicator {
+method get_tsindicator($calc, $name, $spec, $cv, $use_cache) {
     local $_;
-    my ($self, $calc, $name, $spec, $cv, $use_cache) = @_;
     my ($class, $args);
 
     my $class_name = $spec->{class} =~ s/^\+// ? $spec->{class} : $self->default_prefix.$spec->{class};

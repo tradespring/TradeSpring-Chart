@@ -10,6 +10,7 @@ use List::Util qw(max min);
 use Finance::GeniusTrader::Prices;
 use Finance::GeniusTrader::Calculator;
 use Try::Tiny;
+use DateTime;
 
 method skey_prefix { 'live' };
 
