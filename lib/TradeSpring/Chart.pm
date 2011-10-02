@@ -16,7 +16,6 @@ use TradeSpring::Chart::Indicator;
 use TradeSpring::Chart::Order;
 
 use Plack::Builder;
-use Plack::Session::Store::Cache;
 
 has bus => (is => "rw");
 has mtf => (is => "rw", handles => ['render']);
@@ -133,7 +132,6 @@ method wrap_app($app) {
     $app = Plack::Middleware::ConditionalGET->wrap($app);
 }
 
-use CHI;
 use Plack::App::File;
 use Plack::App::Cascade;
 
@@ -159,15 +157,13 @@ method default_app {
 
         mount '/' => builder {
             enable 'Session',
-                store => Plack::Session::Store::Cache->new(
-                    cache => CHI->new( driver => 'Memcached', servers => [ 'localhost:11211' ],
-                                       l1_cache => { driver => 'Memory', global => 1 } )
-                );
-
+                $self->mw_session_options;
             $self->mount_all;
         }
     }
 }
+
+method mw_session_options { () }
 
 method mount_all {
     my $bus = $self->bus;

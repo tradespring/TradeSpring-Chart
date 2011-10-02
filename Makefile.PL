@@ -15,7 +15,6 @@ requires 'Plack::Middleware::JSConcat';
 requires 'Plack::Middleware::Session';
 requires 'Plack::Middleware::Expires';
 requires 'Plack::Middleware::Deflater';
-requires 'Plack::Middleware::Session';
 
 requires 'Text::Xslate';
 requires 'Set::IntSpan';
@@ -24,11 +23,7 @@ requires 'Try::Tiny';
 requires 'JSON';
 requires 'Finance::GeniusTrader::CLI'; # XXX requires my branch
 
-requires 'CHI';
-requires 'CHI::Driver::Memcached';
-
 requires 'Finance::TW::TAIFEX';
-requires 'Cache::Memcached';
 requires 'methods';
 
 requires 'TradeSpring';
