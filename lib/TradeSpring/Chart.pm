@@ -502,6 +502,8 @@ TradeSpring::Chart - raphaeljs-based charting for TradeSpring
 
 =head1 SYNOPSIS
 
+  # please see https://github.com/tradespring/TradeSpring-Chart/wiki for more information
+
   # to use:
   # install the TradeSpring branch of Finance::GeniusTrader from
   # http://github.com/TradeSpring/Finance-Geniustrader
