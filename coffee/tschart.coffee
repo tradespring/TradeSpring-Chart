@@ -265,6 +265,8 @@ class TradeSpring.Chart
             @set_draggable()
           zone = @candle_zone
           zone.data_set[e.i - @loaded_offset] = e.prices
+          @on_view_change()  if e.prices[HIGH] > @view_max or e.prices[LOW] < @view_min
+
           if e.type == "bar"
             e.prices[6] = new timezoneJS.Date(e.prices[0])
             e.prices[6].setTimezone @tz
@@ -286,7 +288,6 @@ class TradeSpring.Chart
             @volume_zone.candle_blanket.push @volbar
           @volume_zone._callbacks[0][e.i - @loaded_offset] = ->
             "Vol: " + e.prices[5]
-          @on_view_change()  if e.prices[HIGH] > @view_max or e.prices[LOW] < @view_min
 
       get_i_from_date_in_view: (date) ->
         ds = @zones[0].data_set
