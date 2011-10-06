@@ -439,6 +439,8 @@ class TradeSpring.Chart.Zone
         @r.path(spec).attr @offset_attr
 
       rect: (x, y, w, h) ->
+        if (h == 0)
+          h = 0.01
         @r.rect(x, @ymax - y, w, h).attr @offset_attr
 
       circle: (x, y, r) ->
