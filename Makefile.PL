@@ -24,6 +24,7 @@ requires 'JSON';
 requires 'Finance::GeniusTrader::CLI'; # XXX requires my branch
 
 requires 'Finance::TW::TAIFEX';
+requires 'Finance::FITF';
 requires 'methods';
 
 requires 'TradeSpring';
