@@ -320,6 +320,8 @@ window.mk_sr = (zone, color) ->
     if ex and my_length > 1
       eset.pop()
       ex.remove()
+    if !last_price
+      my_length = length
     step = zone.r.path().beginMulti().moveTo(x + 5, zone.ymax - price).relatively().lineTo(-5 + (my_length - 1) * -10, 0)
     if entry_price
       entry = zone.r.path().beginMulti().moveTo(x + 5, zone.ymax - entry_price).relatively().lineTo((my_length) * -10, 0).andUpdate().attr(
