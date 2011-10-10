@@ -77,10 +77,27 @@ wrapper = (klass, args) ->
     c.val(d)
   self: c
 
+class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
+  constructor: (@zone, @color = 'black') ->
+  render_item: (val, i) ->
+    price = undefined
+    val = parseInt(val)
+    if !val
+      return
+    price = @zone.data_set[i - @zone.view.loaded_offset][if val > 0 then LOW else HIGH]
+    price -= val * 2
+    arrow = new TSDraw.Arrow(zone: @zone).draw(
+      x: i
+      y: price
+      direction: val,
+      c: @color);
+    @zone.blanket.push arrow
+
 window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
 window.mk_candle_body = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
 window.mk_candle_background_base = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
+window.mk_signal_arrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
 
 window.mk_debug = (zone) ->
   init: (d) ->
