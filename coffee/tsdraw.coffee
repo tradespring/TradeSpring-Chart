@@ -43,7 +43,7 @@ class TSDraw.Arrow extends TSDraw.Widget
         zone = @zone
         width = 8
         _height = 8
-        x = parseFloat((spec.x + @offset) * 10)
+        x = 10 * (parseFloat(spec.x) + @offset)
         mk_path = ->
           height = Math.round(_height / zone.nr_yscale * 100) / 100
           "M" + x + " " + parseFloat(zone.ymax - spec.y) + "l" + (width / 2) + " " + (dir * height) + "l-" + (width) + " 0l" + (width / 2) + " " + (-dir * height) + "z"
@@ -74,7 +74,7 @@ class TSDraw.Arrow extends TSDraw.Widget
 class TSDraw.Line extends TSDraw.Widget
       draw: (spec) ->
         ymax = @zone.ymax
-        @zone.path("M" + parseFloat((@offset + spec.start_x) * 10) + " " + parseFloat(ymax - spec.start_y) + "L" + parseFloat((@offset + spec.end_x) * 10) + " " + parseFloat(ymax - spec.end_y)).attr stroke: spec.c
+        @zone.path("M" + ((parseFloat(spec.start_x) + @offset) * 10) + " " + parseFloat(ymax - spec.start_y) + "L" + ((parseFloat(spec.end_x) + @offset) * 10) + " " + parseFloat(ymax - spec.end_y)).attr stroke: spec.c
 
       start: (cb) ->
         start_x = undefined
