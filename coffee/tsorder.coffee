@@ -227,7 +227,7 @@ class TradeSpring.Order
             that.events["message.tsstream.init"] = e
             that.reinit()
           ).bind("message.tsorder.error", (e, d) ->
-            alert d.error
+            alert d.message
           ).bind "message.tsorder.status", (e, d) ->
             that.order_status e, d
 

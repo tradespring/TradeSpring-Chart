@@ -225,7 +225,7 @@ method mount_all {
             return sub {
                 my $responder = shift;
 
-                $self->populate_user($req->session->{login_id}, sub {
+                $self->populate_user($self->get_user_id($req), sub {
                                          my $user = shift;
                                          $responder->([200, ['Content-Type' => 'text/html; charset=UTF-8' ],
                                                        [  $self->render('home.tx',
@@ -244,6 +244,8 @@ method mount_all {
 method populate_user($user_id, $cb) {
     $cb->(undef);
 }
+
+method get_user_id($req) { 'default' }
 
 method cleanup_listener {}
 
@@ -265,7 +267,7 @@ method handle_tsstream_message($type, $bus, $sub, $msg, $req) {
     # response: { type: 'tsstream.init',      start_date: '......', cnt: , live_starts:, live_ends: }
     # XXX support multiple sessions
     if ($type eq 'subscribe') {
-        my $user_id = $req->session->{login_id};
+        my $user_id = $self->get_user_id($req);
         if ( my $stream = $self->new_session($msg->{session}, $bus, $sub, $user_id) ) {
             my $ready = sub {
                 $sub->{tsstream} = $stream;
