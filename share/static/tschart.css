@@ -130,7 +130,9 @@ div.infobox {
 #holder {
   border: black 1px solid;
   margin: 0;
+  position: relative;
   height: 600px;
+  left: 10px;
   width: 800px;
 }  
 

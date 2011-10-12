@@ -13,7 +13,7 @@ class TradeSpring.Chart
         @tz ||= 'Asia/Taipei'
         @zones = []
         @current_zoom = 10
-        @canvas_width = @x + 10 * @items_to_load
+        @canvas_width = 10 * @items_to_load
         @chart_view = $("<div>").css(
           cursor: "crosshair"
           overflow: "hidden"
@@ -37,7 +37,7 @@ class TradeSpring.Chart
         update_cursor = (e) =>
           e = e.originalEvent.changedTouches[0]  if e.originalEvent.changedTouches
           offX = e.pageX - @canvas.offset().left
-          item = Math.floor(offX / @current_zoom - 0.5)
+          item = Math.floor(offX / @current_zoom + 0.5)
           jQuery.each @zones, ->
             @hi_callback item
 
@@ -59,6 +59,7 @@ class TradeSpring.Chart
         @offset = @cnt - @nb_items()
         @loaded_nb_items = @items_to_load
         @loaded_offset = @cnt - @items_to_load
+
         @price_label = $("<span/>").addClass("ylabel").addClass("cursor").css(
           position: "absolute"
           left: 5 + @x + @width
@@ -73,10 +74,12 @@ class TradeSpring.Chart
         ).appendTo(@holder)
         @canvas.transform origin: [ 0, 0 ]
         @init_width()
+
         $(this).bind "candle-ready", =>
           @candle_ready = true
 
       init_width: ->
+        @x = @holder.offset().left
         @holder.css "width", @width
         @chart_view.css "width", @width
         @canvas.css "left", @nb_items() * @current_zoom - @canvas_width * @current_zoom / 10
@@ -201,7 +204,7 @@ class TradeSpring.Chart
       new_zone: (args) ->
         zone = new TradeSpring.Chart.Zone(
           r: @r
-          x: 10
+          x: 0
           y: args.y
           width: @canvas_width
           height: args.height
