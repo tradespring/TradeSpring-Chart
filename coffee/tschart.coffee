@@ -33,6 +33,7 @@ class TradeSpring.Chart
           e = e.originalEvent.changedTouches[0]  if e.originalEvent.changedTouches
           offX = e.pageX - @canvas.offset().left
           item = Math.floor(offX / @current_zoom + 0.5)
+          @cursor_item = item
           jQuery.each @zones, ->
             @hi_callback item
 
@@ -140,7 +141,7 @@ class TradeSpring.Chart
         change = =>
           left = $(canvas).offset().left
           @scroll.x = left
-          @offset = @loaded_offset + Math.max(0, Math.round((-left) / view.current_zoom))
+          @offset = @loaded_offset + Math.max(0, Math.round((-left) / view.current_zoom + @x/10))
           @on_view_change()
 
         if @scroll
@@ -152,9 +153,10 @@ class TradeSpring.Chart
         that = this
         @scroll = new iScroll(@chart_view.get(0),
           vScroll: false
+          wheelAction: 'none'
           zoomMin: 1
           zoomMax: 1
-          zoom: true
+          zoom: false
           bounce: false
           momentum: false
           x: left
@@ -164,11 +166,11 @@ class TradeSpring.Chart
             @maxScrollX = @wrapperW - @scrollerW
             @x = $(canvas).offset().left
 
-          onZoomStart: (x, e) =>
+# XXX: not yet
+          XXXonZoomStart: (x, e) =>
             last_zoom = @current_zoom
             zooming = true
-
-          onZoom: (e) =>
+          XXXonZoom: (e) =>
             @zoomed = false
             scale = Math.round(1 / @touchesDistStart * @touchesDist * last_zoom)
             scale = Math.min(scale, 20)
@@ -349,7 +351,7 @@ class TradeSpring.Chart
 
       zoom: (orig_zoom, center_item, zoomdir) ->
         center_item = @loaded_nb_items  unless center_item
-        @offset += zoomdir * Math.floor((center_item - (@offset - @loaded_offset))) / @current_zoom
+        @offset += zoomdir * Math.ceil((1 + center_item - (@offset - @loaded_offset))) / @current_zoom
         @offset = Math.min(@offset, @loaded_offset + @loaded_nb_items - @nb_items())
         @offset = Math.max(@offset, @loaded_offset)
         left = Math.max(@nb_items(), @loaded_offset + @loaded_nb_items - @offset) * @current_zoom - @canvas_width * @current_zoom / 10

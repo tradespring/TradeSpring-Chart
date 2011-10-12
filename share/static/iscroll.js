@@ -611,6 +611,10 @@ iScroll.prototype = {
 			deltaX, deltaY,
 			deltaScale;
 
+		if (that.options.wheelAction == 'none') {
+			return;
+		}
+
 		if ('wheelDeltaX' in e) {
 			wheelDeltaX = e.wheelDeltaX / 12;
 			wheelDeltaY = e.wheelDeltaY / 12;

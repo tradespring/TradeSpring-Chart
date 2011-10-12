@@ -35,7 +35,7 @@ class TradeSpring.ChartUI
         last_x = undefined
         last_center = undefined
         view.chart_view.mousewheel (ev, delta) ->
-          center_item = (if last_x and last_x == ev.clientX then last_center else Math.floor(ev.offsetX / 10 + 0.5))
+          center_item = (if last_x and last_x == ev.clientX then last_center else view.cursor_item)
           last_x = ev.clientX
           last_center = center_item
           if delta > 0
