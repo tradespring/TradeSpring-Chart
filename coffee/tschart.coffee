@@ -226,9 +226,9 @@ class TradeSpring.Chart
               @price_label.text(y).css top: scaled_y
               true
 
-            zone.canvas_holder.mousemove update_cursor
-            zone.canvas_holder.bind "touchstart", update_cursor
-            zone.canvas_holder.bind "touchend", update_cursor
+            @chart_view.mousemove update_cursor
+            @chart_view.bind "touchstart", update_cursor
+            @chart_view.bind "touchend", update_cursor
 
           zone.canvas = $("<div/>").appendTo(zone.canvas_holder).addClass("zone").css(
             width: @canvas_width
