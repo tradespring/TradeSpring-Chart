@@ -93,10 +93,104 @@ class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
       c: @color);
     @zone.blanket.push arrow
 
+class TradeSpring.Widget.Band extends TradeSpring.Widget
+  constructor: (@zone, @color = 'black', @name, @boundry_only, @slow, @annotate, @annotate_cb) ->
+    @last_up = undefined
+    @last_down = undefined
+    @label = undefined
+    @pointer = undefined
+
+  render_item: (val, i) ->
+    [up, down] = val || []
+
+    @last_up   = null  unless up?
+    @last_down = null  unless down?
+
+    return if not up? or not down?
+    if up == down
+      up += 0.5
+      down -= 0.5
+
+    if @last_up == @last_down
+      @last_up += 0.5
+      @last_down -= 0.5
+
+    ymax = @zone.ymax
+    p = @zone.path([ [ "M", (i) * 10, ymax - up ], [ "l", 15, 0 ], [ "l", 0, up-down ], [ "l", -15, 0 ], [ "z" ] ])
+
+    if @pointer
+      @pointer.attr('path', p.attr('path')).toBack()
+      p.remove();
+    else
+      @pointer = p.attr(
+        "stroke-width": "0.0"
+        fill: @color
+        stroke: "none"
+        "fill-opacity": 0.5
+      ).toBack()
+
+    xstart = i - if @last_up and @last_down then 1 else 0.5
+    a = @zone.path([ [ "M", xstart * 10, ymax - @last_up ], [ "L", (i) * 10, ymax - up ], [ "L", (i) * 10, ymax - down ], [ "L", xstart * 10, ymax - @last_down ], [ "z" ] ]).attr(
+      "stroke-width": "0.0"
+      fill: @color
+      stroke: "none"
+      "fill-opacity": 0.5
+    ).toBack()
+    @zone.blanket.push a
+    if @annotate
+      text = Math.round(down) + " - " + Math.round(up)
+      if @label and @last_up
+        @label.attr "text", text
+      else
+        @label = @zone.text(i * 10, up - 5, text).attr(
+          "font-size": 16
+          "text-anchor": "left"
+        ).toBack()
+        @label.translate -$(label.node).width() / 2
+        @zone.blanket.push @label
+        @annotate_cb()  if @annotate_cb
+    @last_up = up
+    @last_down = down
+
+  init: (d) ->
+    if @slow
+      return super(d)
+
+    _curve_up = @zone.render_curve($.map(d.values, (val) ->
+      (if not val? or not val[0]? then false else (if val[0] == val[1] then val[0] + 0.5 else val[0]))
+    ), d.start, "black", null, true).attr(
+      "stroke-width": "0.0"
+      stroke: "none"
+    )
+    _curve_down = @zone.render_curve($.map(d.values, (val) ->
+      (if not val? or not val[1]? then false else (if val[0] == val[1] then val[1] - 0.5 else val[1]))
+    ), d.start, "black", null, true).attr(
+      "stroke-width": "0.0"
+      stroke: "none"
+    )
+    area = $.extend(true, [], _curve_up.attr("path")).concat($.extend(true, [], _curve_down.attr("path")).reverse())
+    area.push [ "z" ]
+    _area = @zone.r.path(area).attr(
+      scale: _curve_up.attrs.scale
+      translation: _curve_up.attrs.translation
+    ).attr(
+      path: area
+      "stroke-width": "none"
+      fill: @color
+      stroke: "none"
+      "fill-opacity": 0.5
+    ).toBack()
+    @zone.blanket.push _area
+    @last_up = d.values[d.values.length - 1][0]
+    @last_down = d.values[d.values.length - 1][1]
+
+
+
 window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
 window.mk_candle_body = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
 window.mk_candle_background_base = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
+window.mk_band = (args...) -> wrapper(TradeSpring.Widget.Band, args)
 window.mk_signal_arrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
 
 window.mk_debug = (zone) ->
@@ -170,84 +264,6 @@ window.mk_ellipse = (zone, color, name) ->
 
   val: (d) ->
     render_item d.value, d.i  if d.value? and d.value[0]?
-
-window.mk_band = (zone, color, name, boundry_only, slow, annotate, annotate_cb) ->
-  last_up = undefined
-  last_down = undefined
-  _area = undefined
-  _curve_up = undefined
-  _curve_down = undefined
-  label = undefined
-  render_item = (up, down, i) ->
-    last_up = null  unless up?
-    last_down = null  unless down?
-    return  if not up? or not down?
-    if up == down
-      up += 0.5
-      down -= 0.5
-    ymax = zone.ymax
-    xstart = i - if last_up and last_down then 1 else 0.5
-    a = zone.path([ [ "M", xstart * 10, ymax - last_up ], [ "L", (i) * 10, ymax - up ], [ "L", (i) * 10, ymax - down ], [ "L", xstart * 10, ymax - last_down ], [ "z" ] ]).attr(
-      "stroke-width": "0.0"
-      fill: color
-      stroke: "none"
-      "fill-opacity": 0.5
-    ).toBack()
-    zone.blanket.push a
-    if annotate
-      text = Math.round(down) + " - " + Math.round(up)
-      if label and last_up
-        label.attr "text", text
-      else
-        label = zone.text(i * 10, up - 5, text).attr(
-          "font-size": 16
-          "text-anchor": "left"
-        ).toBack()
-        label.translate -$(label.node).width() / 2
-        zone.blanket.push label
-        annotate_cb()  if annotate_cb
-    last_up = up
-    last_down = down
-  init: (d) ->
-    if slow
-      jQuery(d.values).each (idx) ->
-        render_item this[0], this[1], d.start + idx
-
-      return
-    _curve_up = zone.render_curve($.map(d.values, (val) ->
-      (if not val? or not val[0]? then false else (if val[0] == val[1] then val[0] + 0.5 else val[0]))
-    ), d.start, "black", null, true).attr(
-      "stroke-width": "0.0"
-      stroke: "none"
-    )
-    _curve_down = zone.render_curve($.map(d.values, (val) ->
-      (if not val? or not val[1]? then false else (if val[0] == val[1] then val[1] - 0.5 else val[1]))
-    ), d.start, "black", null, true).attr(
-      "stroke-width": "0.0"
-      stroke: "none"
-    )
-    area = $.extend(true, [], _curve_up.attr("path")).concat($.extend(true, [], _curve_down.attr("path")).reverse())
-    area.push [ "z" ]
-    _area = zone.r.path(area).attr(
-      scale: _curve_up.attrs.scale
-      translation: _curve_up.attrs.translation
-    ).attr(
-      path: area
-      "stroke-width": "none"
-      fill: color
-      stroke: "none"
-      "fill-opacity": 0.5
-    ).toBack()
-    zone.blanket.push _area
-    last_up = d.values[d.values.length - 1][0]
-    last_down = d.values[d.values.length - 1][1]
-
-  val: (d) ->
-    if d.value?
-      render_item d.value[0], d.value[1], d.i
-    else
-      last_up = null
-      last_down = null
 
 window.mk_colorheat = (zone, mul) ->
   get_color = (val) ->
