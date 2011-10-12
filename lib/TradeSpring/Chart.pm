@@ -200,6 +200,7 @@ method mount_all {
         return [200, ['Content-Type' => 'text/html; charset=UTF-8' ],
                 [ $self->render('session.tx', { req => $req, key => $skey,
                                                 js_files => [ $self->js_files ],
+                                                order => $session->{is_live},
                                                 tz => $session->{tz},
                                                 env => $env, code => $session->{code}, tf => $tf }) ]];
     };

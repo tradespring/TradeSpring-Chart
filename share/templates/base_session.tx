@@ -46,7 +46,7 @@ $(function() {
 %}
 
         $(window).resize(function() {
-            view.width = $(this).width() - 130;
+            view.width = $(this).width() - 150;
             view.init_width();
         }).resize();
     }
@@ -98,9 +98,6 @@ $(function() {
                                session: '<%= $k %>'
                              });
               });
-
-    hpipe.init();
-
 
 $('#print').toggle(function() {
     $('path.candleup').css({'stroke': 'black', 'fill': 'white', 'stroke-width': 0.5});
@@ -167,6 +164,9 @@ $('#go').click(function() {
 <span class="price volume"></span>
 </div>
 
+% if $order {
+% include 'order-header.tx'
+% }
 <div id="connection-status" class="disconnected">
 Connecting...
 </div>
@@ -186,6 +186,17 @@ Connecting...
 <input id="go" type="button" value="go">
 <input id="end" type="button" value=">>>>|">
 % }
+
+% if $order {
+% include 'order-init.tx'
+% }
+
+
+<script type="text/javascript">
+$(function() {
+    hpipe.init();
+})
+</script>
 
 </body>
 </html>

@@ -1,0 +1,145 @@
+<div id="order-list" style="width: 800px"></div>
+<div id="log"></div>
+
+  <ul id="trade_context_menu" class="contextMenu">
+    <li class="buy"><a href="#buymkt">Market Buy (ctrl-&uarr;)</a></li>
+    <li class="sell"><a href="#sellmkt">Market Sell (ctrl-&darr;)</a></li>
+
+    <li class="buy separator"><a href="#buy">Buy <select name="buytype"><option value="stp">stp</option><option value="lmt">lmt</option></select> @ <span class="price"></span></a></li>
+    <li class="sell"><a href="#sell">Sell <select name="selltype"><option value="stp">stp</option><option value="lmt">lmt</option></select> @ <span class="price"></span></a></li>
+
+    <li class="separator"><a href="#rebracket">Resubmit tp/sl @ <span class="price"></span></a></li>
+    <li class="separator qty">Qty: <input size="2" name="qty" type="text" value="1"></li>
+    <li><input class="checkbox-tp" type="checkbox" checked value="tp"/>Take Profit: <input size="3" name="tppoint" type="text" value="50"></li>
+    <li><input class="checkbox-sl" type="checkbox" checked value="sl"/>Stop Loss: <input size="3" name="slpoint" type="text" value="30"></li>
+  </ul>
+
+
+<script type="text/javascript">
+var tradetable;
+$(function() {
+  $('#order-list').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="order-listdata"></table>' );
+  tradetable = $('#order-listdata').dataTable( {
+                "bPaginate": false,
+		"bFilter": false,
+		"bSort": false,
+		"bAutoWidth": true,
+		"aaData": [],
+                "sDom": 'lfrt',
+                "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                                     if ( aData[2] == "new" && !$('td.status span.cancel-order', nRow).length ) {
+                                        $('td.status', nRow)
+                                          .append($("<span>/").addClass('cancel-order').text('cancel')
+                                                              .click(function() {
+                                                                  TradeSpring.OrderUI.torder.cancel_order(aData[5]);
+                                                              }));
+                                     }
+                                     return nRow;
+                },
+		"aoColumns": [
+			{ "sTitle": "Direction",
+				"fnRender": function(obj) {
+					var sReturn = obj.aData[ obj.iDataColumn ];
+					return sReturn == 1 ? "Buy" : "Sell";
+				}
+			},
+			{ "sTitle": "Type" },
+			{ "sTitle": "Status",
+                          "sClass": "status"
+                        },
+			{ "sTitle": "Price" },
+			{
+				"sTitle": "Profit",
+				"sClass": "center",
+				"fnRender": function(obj) {
+					var sReturn = obj.aData[ obj.iDataColumn ];
+					if ( sReturn == "A" ) {
+						sReturn = "<b>A</b>";
+					}
+					return sReturn;
+				}
+			},
+                        { "bVisible": false }
+		]
+	} );
+    $(document).bind('keydown', 'ctrl+up', function (e) {
+        TradeSpring.OrderUI.torder.submit_order(1, 'mkt', 0, 1);
+        $('#log').prepend("buy market<br>");
+    });
+
+    $(document).bind('keydown', 'ctrl+shift+up', function (e) {
+        var val = parseFloat(view.price_label.text());
+        $('#log').prepend("figre out smart price for "+val+"<br>");
+        TradeSpring.OrderUI.torder.submit_order(1, 'lmt', val, 1);
+        $('#log').prepend("buy limit "+val+"<br>");
+    });
+
+    $(document).bind('keydown', 'ctrl+down', function (e) {
+        TradeSpring.OrderUI.torder.submit_order(-1, 'mkt', 0, 1);
+        $('#log').prepend("sell market<br>");
+    });
+
+    $(document).bind('keydown', 'ctrl+shift+down', function (e) {
+        var val = parseFloat(view.price_label.text());
+        TradeSpring.OrderUI.torder.submit_order(-1, 'lmt', val, 1);
+        $('#log').prepend("sell limit "+val+"<br>");
+    });
+
+    var h = $('#header');
+    var last_price;
+    var ctx_menu_args = {
+        outSpeed: 0,
+        inSpeed: 0,
+        propagateMouseEvents: true,
+        menu: 'trade_context_menu',
+        onShow: function(menu) {
+            last_price = parseFloat(view.price_label.text());
+            $('a span.price', menu).text(last_price);
+            $('a span.price', menu).text(last_price);
+            var current = parseFloat($('.current', h).text());
+            if (last_price > current) {
+                $('select[name=selltype]', menu).val('lmt');
+                $('select[name=buytype]', menu).val('stp');
+            }
+            else {
+                $('select[name=selltype]', menu).val('stp');
+                $('select[name=buytype]', menu).val('lmt');
+            }
+        }
+    };
+    var ctx_menu_cb = function(action, el, pos) {
+        var menu = $('#trade_context_menu'); 
+        var qty =parseInt($('input[name=qty]', menu).val());
+
+        if (action == 'buymkt') {
+            TradeSpring.OrderUI.torder.submit_order(1, 'mkt', 0, qty, menu);
+        }
+        else if (action == 'sellmkt') {
+            TradeSpring.OrderUI.torder.submit_order(-1, 'mkt', 0, qty, menu);
+        }
+        else if (action == 'buy') {
+            var type = $('select[name=buytype]', menu).val();
+            TradeSpring.OrderUI.torder.submit_order(1, type, last_price, qty, menu);
+        }
+        else if (action == 'sell') {
+            var type = $('select[name=selltype]', menu).val();
+            TradeSpring.OrderUI.torder.submit_order(-1, type, last_price, qty, menu);
+        }
+        else if (action =='rebracket') {
+            TradeSpring.OrderUI.torder.rebracket(last_price, qty, menu);
+        }
+    };
+
+    $(hpipe)
+        .bind("message.tsstream.init", function(e, d) {
+            TradeSpring.OrderUI.init(view, tradetable, hpipe);
+            view.chart_view.contextMenu(ctx_menu_args, ctx_menu_cb);
+
+            if (/^live/.test(d.session)) {
+                TradeSpring.OrderUI.probe_wsj('localhost', 5009, 'wsj.json');
+            }
+        });
+
+
+});
+</script>

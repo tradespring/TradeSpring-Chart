@@ -204,6 +204,7 @@ span.cancel-order {
   border-style: solid;
   border-width: 1px;
   color: white;
+  cursor: pointer;
 }
 
 span.cancel-order:hover {

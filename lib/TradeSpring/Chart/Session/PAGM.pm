@@ -25,6 +25,7 @@ method BUILD {
     my $myself = $pagmbus->topic("pagmclient-$code-$$");
     my $client = $pagmbus->new_listener($myself);
     my $ready = AE::cv;
+    $self->is_live(1);
     $self->init_ready(AE::cv);
 
     $client->on_error(sub {
@@ -60,6 +61,7 @@ method BUILD {
                 ready => $ready,
                 tick  => $bus->topic({ name => "$skey/tick", recycle => 0}),
                 dhl   => [undef, undef],
+                is_live => 1,
             };
             $self->session($live);
             $self->init_ready->send(1);

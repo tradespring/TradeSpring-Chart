@@ -329,17 +329,17 @@ class TradeSpring.Order
           pending_qty = o.qty - parseInt(o.matched or 0)
           label = $("<span/>").addClass("ylabel order display").css(
             position: "absolute"
-            left: 5 + view.x + view.width
+            right: -120
             top: view.candle_zone.val_to_y(o.price)
             background: c
           ).html((if o.dir > 0 then "B" else "S") + "<span class=\"pending-qty\">" + pending_qty + "</span>/<span class=\"qty\">" + parseInt(o.qty) + "</span>@<span class=\"price\">" + parseInt(o.price) + "</span> " + o.type).appendTo(view.holder)
+          label.css("margin-top", -label.height() / 2)
           label.addClass "submitted"  unless status == "new"
           cancel = $("<span/>").addClass("cancel-order").text("C").attr("title", "Cancel").click(->
             TradeSpring.OrderUI.torder.cancel_order id
           ).appendTo(label)
           line = $("<div>").addClass("order-line").css(
             "border-top-color": c
-            "margin-top": -label.height() / 2
           ).appendTo(label)
           update_price = undefined
           start_price = undefined

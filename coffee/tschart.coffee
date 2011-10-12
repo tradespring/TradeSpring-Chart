@@ -634,10 +634,11 @@ class TradeSpring.Chart.Zone
           i = start
 
           while i < end
-            $("<span/>").addClass("ylabel").addClass("yaxis").text(i * step).css(
+            label = $("<span/>").addClass("ylabel").addClass("yaxis").text(i * step).css(
               position: "absolute"
-              left: 5 + @x + @view.width
             ).appendTo @view.holder
+            label.css("margin-top", -label.height() / 2)
+            label.css("right", -label.width())
             ++i
         that = this
         $("span.ylabel").each ->

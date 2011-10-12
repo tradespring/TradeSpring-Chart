@@ -1,0 +1,15 @@
+<div id="trade-header">
+<div class="summary" style="float: left">
+<span>POS:</span>
+<span class="value current-position">0</span>
+<span>AVG:</span>
+<span class="value avg-position">0</span>
+<span>R.Pf:</span>
+<span class="value realized">0</span>
+<span>U.Pf:</span>
+<span class="value unrealized">0</span>
+</div>
+<div class="select" style="float: left">
+<select id="broker-select" style="margin: 0"></select>
+</div>
+</div>

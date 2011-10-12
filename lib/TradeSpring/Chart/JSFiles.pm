@@ -14,7 +14,7 @@ sub files {
        timezone.js
        raphael.js plugins/raphael.path.methods.js
        plugins/raphael.primitives.js
-       jquery.cookie.js
+       jquery.cookie.js jquery.hotkeys.js
        jquery.dataTables.js jquery.ui.js
        jquery.contextMenu.js
        gen/tschart.js gen/tsdraw.js

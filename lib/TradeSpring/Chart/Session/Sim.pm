@@ -72,6 +72,7 @@ method BUILD {
                 tick  => $self->bus->topic({ name => "$skey/tick", recycle => 0}),
                 dhl   => [undef, undef],
                 ready => $ready,
+                is_live => 1,
             };
 
     $ready->begin;
@@ -81,6 +82,7 @@ method BUILD {
 
     $ready->end;
     $self->session($sim);
+    $self->is_live(1);
 }
 
 my $smap = {
