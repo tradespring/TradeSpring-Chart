@@ -84,6 +84,7 @@ div.hcursor {
     left: 0px;
     position: absolute;
     width: 100%;
+    cursor: crosshair;
 }
 
 div.vcursor {
@@ -92,6 +93,7 @@ div.vcursor {
     position: absolute;
     width: 0px;
     top: 0px;
+    cursor: crosshair;
 }
 
 div.order-line {
@@ -102,6 +104,16 @@ div.order-line {
     margin-left: -100%;
     position: absolute;
     width: 100%;
+}
+
+div.yaxis-line {
+    border-top-style: solid;
+    border-top-color: balack;
+    border-top-width: 1px;
+    height: 0px;
+    margin-top: -50%;
+    position: absolute;
+    opacity: 0.2
 }
 
 span.order.submitted div.order-line {

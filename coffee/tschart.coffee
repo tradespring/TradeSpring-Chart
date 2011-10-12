@@ -17,11 +17,6 @@ class TradeSpring.Chart
         @chart_view = $("<div>").css(
           cursor: "crosshair"
           overflow: "hidden"
-          "-webkit-animation-timing-function": "ease-in"
-          "-webkit-transform-origin-x": "100%"
-          "-webkit-transform-origin-y": "0px"
-          "-webkit-transition-delay": "0.5s"
-          "-webkit-transition-duration": "3s"
           position: "relative"
           width: @width
           height: @height
@@ -87,7 +82,9 @@ class TradeSpring.Chart
         @price_label.css "left", 5 + @x + @width
         @price_label_high.css "left", 5 + @x + @width
         @price_label_low.css "left", 5 + @x + @width
-        $("span.ylabel", @holder).css "left", 5 + @x + @width
+        $("div.yaxis-line").css(
+          'width': @width
+          'margin-left': -@width)
         @set_draggable()
 
       ready: (cb) ->
@@ -118,6 +115,8 @@ class TradeSpring.Chart
           else
             return
           return  if @view_lock_decrease and max - min < delta
+          force_ylabel = 1
+
         max += (max - min) * 0.1
         min -= (max - min) * 0.1
         @view_max = max
@@ -131,7 +130,7 @@ class TradeSpring.Chart
 
         $("path.curve", zone.r.canvas).attr "stroke-width", (2 / scale) + "px"
         $(this).trigger "scale-changed"
-        zone.render_ylabels()  if zone.ylabels
+        zone.render_ylabels(@view_max, @view_min, force_ylabel)
 
       set_draggable: ->
         left = @current_zoom * (Math.min(0, @nb_items() - @loaded_nb_items))
@@ -626,31 +625,50 @@ class TradeSpring.Chart.Zone
         y = (@ymax - val) * @offset_attr.scale[1]
         (if @new_resize and @nr_yscale then (y + @nr_offset) * @nr_yscale else y)
 
-      render_ylabels: ->
-        unless @ylabels
-          step = (if @ymax - @ymin > 500 then 200 else 50)
-          start = Math.round(@ymin / step)
-          end = Math.round(@ymax / step) + 2
-          i = start
+      render_ylabels: (ymax=@ymax, ymin=@ymin, force) ->
+        range = ymax - ymin
+        step = (if range > 500 then 200     \
+                else if range > 200 then 50 \
+                else                     20)
+        start = Math.round(ymin / step)
+        end = Math.round(ymax / step) + 2
+        i = start
+        steps = []
+        @ylabels = {} unless @ylabels
+        while i < end
+          val = i++ * step
+          steps.push val
 
-          while i < end
-            label = $("<span/>").addClass("ylabel").addClass("yaxis").text(i * step).css(
-              position: "absolute"
-            ).appendTo @view.holder
-            label.css("margin-top", -label.height() / 2)
-            label.css("right", -label.width())
-            ++i
+        $("span.ylabel.yaxis").hide()
+        for val in steps
+          if @ylabels[val]
+            @ylabels[val].show()
+            continue
+          label = $("<span/>").addClass("ylabel").addClass("yaxis").text(val).css(
+            position: "absolute"
+          ).appendTo @view.holder
+          label.css("margin-top", -label.height() / 2)
+          label.css("right", -label.width())
+          label.get(0).price = val
+          line = $("<div>").css(
+            'width': @view.width
+            'margin-left': -@view.width
+          ).addClass("yaxis-line").appendTo(label)
+
+          @ylabels[val] = label;
+
         that = this
         $("span.ylabel").each ->
-          return  if $(this).hasClass("cursor")
-          val = parseFloat($(this).text()) or parseFloat($(".price", this).text())
+          jt = $(this)
+          return if jt.hasClass('cursor')
+          val = this.price or parseFloat(jt.text()) or parseFloat($(".price", this).text())
           unless val?
 
           else
             y = that.val_to_y(val)
             if y < 0 or y > that.height
-              $(this).hide()
+              jt.hide()
             else
-              $(this).css("top", y).show()
+              jt.css("top", y)
+              jt.show() unless jt.hasClass('yaxis')
 
-        @ylabels = $("span.ylabel")
