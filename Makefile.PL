@@ -41,6 +41,8 @@ WriteAll;
 
 sub MY::postamble {
     return <<'MAKE_FRAG';
+all:: buildjs
+
 buildjs:
 	$(PERL) utils/build.pl
 MAKE_FRAG
