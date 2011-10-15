@@ -49,10 +49,11 @@ method BUILD {
 }
 
 method share_dir {
-    Cwd::realpath(
-        eval { File::ShareDir::module_dir('TradeSpring::Chart') } ||
-            File::Spec->rel2abs("../../share", File::Basename::dirname($INC{"TradeSpring/Chart.pm"}))
-    );
+    my $dist_dir = File::Spec->rel2abs("../../share", File::Basename::dirname($INC{"TradeSpring/Chart.pm"}));
+
+    Cwd::realpath( -e $dist_dir
+                       ? $dist_dir
+                       : File::ShareDir::dist_dir('TradeSpring-Chart'));
 }
 
 method template_dir {
