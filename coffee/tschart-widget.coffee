@@ -111,7 +111,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
       up += 0.5
       down -= 0.5
 
-    if @last_up == @last_down
+    if @last_up && @last_up == @last_down
       @last_up += 0.5
       @last_down -= 0.5
 
