@@ -146,7 +146,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
           "font-size": 16
           "text-anchor": "left"
         ).toBack()
-        @label.translate -$(label.node).width() / 2
+        @label.translate -$(@label.node).width() / 2
         @zone.blanket.push @label
         @annotate_cb()  if @annotate_cb
     @last_up = up
