@@ -99,8 +99,9 @@ class TradeSpring.Chart
       on_view_change: ->
         zone = @candle_zone
         start = @offset - @loaded_offset
-        return  unless zone.data_set
+        return unless zone.data_set
         zone.on_view_change(start)
+        @volume_zone.on_view_change(start)
 
       set_draggable: ->
         left = @current_zoom * (Math.min(0, @nb_items() - @loaded_nb_items))
@@ -211,7 +212,24 @@ class TradeSpring.Chart
           zone.r = Raphael(zone.canvas.get(0), @canvas_width, args.height)
           hcursor = $("<div/>").appendTo(zone.canvas_holder).addClass("hcursor")
           zone.new_resize = 1
-        else @volume_zone = zone  unless @volume_zone
+        else
+          unless @volume_zone
+            @volume_zone = zone
+            zone.canvas_holder = $("<div/>").appendTo(@canvas).addClass("zoneroot")
+            zone.canvas = $("<div/>").appendTo(zone.canvas_holder).addClass("zone").css(
+              width: @canvas_width
+              height: @height
+              top: zone.y
+              left: 0
+              "-webkit-transform-origin-y": "0px"
+              position: "absolute"
+            )
+            zone.r = Raphael(zone.canvas.get(0), @canvas_width, args.height)
+            zone.new_resize = 1
+            zone.range_cb = (start) =>
+              d = @candle_zone.data_set.slice(start, start + @nb_items() + 1)
+              max = Math.max.apply(@, $.map(d, (data) -> data[VOLUME]))
+              [0, max]
         zone
 
       on_new_event: (e) ->
@@ -443,7 +461,7 @@ class TradeSpring.Chart.Zone
             @r.setSize null, @ymax - @ymin  if @ymax - @ymin > @r.height
             yscale = 1
           @offset_attr =
-            translation: [ @x - (@view.loaded_offset * 10), @y / yscale ]
+            translation: [ @x - (@view.loaded_offset * 10), 0 ]
             scale: [ 1, yscale, 1, 1 ]
 
           @render_ylabels()  if @ylabels
@@ -474,7 +492,8 @@ class TradeSpring.Chart.Zone
             @blanket.translate 0, (@ymax - oldmax) * yscale + @y * (1 - yscale / oldscale)
             @render_ylabels()  if @ylabels
 
-      on_view_change: (start) ->
+      zone_range: (start) ->
+        return @range_cb(start) if @range_cb
         d = @data_set.slice(start, start + @view.nb_items() + 1)
         p = $("span.ylabel.display").map(->
           parseFloat($(@).text()) or parseFloat($(".price", @).text())
@@ -485,6 +504,10 @@ class TradeSpring.Chart.Zone
         min = Math.min.apply(@, p.concat($.map(d, (data) ->
           data[LOW]
         )))
+        [min, max]
+
+      on_view_change: (start) ->
+        [min, max] = @zone_range(start)
         if @view_max and @view_min and Math.abs(@view_max) != Infinity and Math.abs(@view_min) != Infinity
           delta = @view_max - @view_min
           if max > @view_max - delta * 0.05 or max < @view_max - delta * 0.1 or min < @view_min + delta * 0.05 or min > @view_min + delta * 0.1
@@ -544,10 +567,10 @@ class TradeSpring.Chart.Zone
         @candle_blanket.push p
         p
 
-      render_bar: (data_set, start_idx, color, n, high_pad, low_pad, fast) ->
+      render_bar: (data_set, start_idx, color, n, high_pad, low_pad, fast, bar_base) ->
         default_color = "red"
         name = n or "unknown"
-        @resize data_set, data_set, high_pad or 20, low_pad or 0  unless fast
+        @resize data_set, (if bar_base? then [bar_base] else data_set), high_pad or 20, low_pad or 0  unless fast
         dx = 10
         if @ymin < 0
           p = @r.path().moveTo(dx * start_idx, @ymax).lineTo(dx * (start_idx + @view.items_to_load), @ymax).attr(@offset_attr).attr(

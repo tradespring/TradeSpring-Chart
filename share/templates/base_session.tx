@@ -67,7 +67,7 @@ $(function() {
             var c = jQuery(d.prices).map(function() {
                 return (this[OPEN] < this[CLOSE] ? 'red' : 'green')
             }).get();
-            view.volume_zone.render_bar(vols, d.start, c, 'Vol');
+            view.volume_zone.render_bar(vols, d.start, c, 'Vol', 0, 0, 0, 0);
 
             view.init_columns();
             TradeSpring.ChartUI.init_live_events(view, hpipe, $('#header'));
