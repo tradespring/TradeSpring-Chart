@@ -185,7 +185,11 @@ class TradeSpring.Chart
         unless @candle_zone
           @candle_zone = zone
           hcursor = undefined
-          zone.canvas_holder = $("<div/>").appendTo(@canvas).addClass("zoneroot")
+          zone.canvas_holder = $("<div/>").appendTo(@canvas).addClass("zoneroot").css(
+            height: @height
+            top: zone.y
+            position: 'absolute'
+          )
           @ready =>
             update_cursor = (e) =>
               e = e.originalEvent.touches[0]  if e.originalEvent.touches
@@ -203,11 +207,10 @@ class TradeSpring.Chart
 
           zone.canvas = $("<div/>").appendTo(zone.canvas_holder).addClass("zone").css(
             width: @canvas_width
-            height: @height
+            height: zone.height
             top: 0
             left: 0
             "-webkit-transform-origin-y": "0px"
-            position: "absolute"
           )
           zone.r = Raphael(zone.canvas.get(0), @canvas_width, args.height)
           hcursor = $("<div/>").appendTo(zone.canvas_holder).addClass("hcursor")
@@ -215,14 +218,17 @@ class TradeSpring.Chart
         else
           unless @volume_zone
             @volume_zone = zone
-            zone.canvas_holder = $("<div/>").appendTo(@canvas).addClass("zoneroot")
+            zone.canvas_holder = $("<div/>").appendTo(@canvas).addClass("zoneroot").css(
+              height: zone.height
+              top: zone.y
+              position: 'absolute'
+            )
             zone.canvas = $("<div/>").appendTo(zone.canvas_holder).addClass("zone").css(
               width: @canvas_width
               height: @height
-              top: zone.y
+              top: 0
               left: 0
               "-webkit-transform-origin-y": "0px"
-              position: "absolute"
             )
             zone.r = Raphael(zone.canvas.get(0), @canvas_width, args.height)
             zone.new_resize = 1
@@ -518,7 +524,7 @@ class TradeSpring.Chart.Zone
           force_ylabel = 1
 
         max += (max - min) * 0.1
-        min -= (max - min) * 0.1
+        min -= (max - min) * 0.1 if min
         @view_max = max
         @view_min = min
 
@@ -580,6 +586,7 @@ class TradeSpring.Chart.Zone
           @candle_blanket.push p
         callback = []
         @_callbacks.push callback
+        @on_view_change(@view.offset - @view.loaded_offset)
         for i of data_set
           data = data_set[i]
           x = dx * (parseInt(i) + start_idx)
@@ -646,7 +653,7 @@ class TradeSpring.Chart.Zone
           [bar, cb] = @render_candle_item(x, data, 1)
           @candle_blanket.push bar
           callback.push cb
-        @view.on_view_change()
+        @on_view_change(@view.offset - @view.loaded_offset)
         $(@view).trigger "candle-ready"
 
       val_to_y: (val) ->
