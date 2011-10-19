@@ -5,6 +5,7 @@ exports.OPEN = 1
 exports.HIGH = 2
 exports.LOW = 3
 exports.CLOSE = 4
+exports.VOLUME = 5
 
 class TradeSpring.Chart
       constructor: (opt)->
@@ -99,39 +100,7 @@ class TradeSpring.Chart
         zone = @candle_zone
         start = @offset - @loaded_offset
         return  unless zone.data_set
-        d = zone.data_set.slice(start, start + @nb_items() + 1)
-        p = $("span.ylabel.display").map(->
-          parseFloat($(this).text()) or parseFloat($(".price", this).text())
-        ).get()
-        max = Math.max.apply(this, p.concat($.map(d, (data) ->
-          data[HIGH]
-        )))
-        min = Math.min.apply(this, p.concat($.map(d, (data) ->
-          data[LOW]
-        )))
-        if @view_max and @view_min and Math.abs(@view_max) != Infinity and Math.abs(@view_min) != Infinity
-          delta = @view_max - @view_min
-          if max > @view_max - delta * 0.05 or max < @view_max - delta * 0.1 or min < @view_min + delta * 0.05 or min > @view_min + delta * 0.1
-
-          else
-            return
-          return  if @view_lock_decrease and max - min < delta
-          force_ylabel = 1
-
-        max += (max - min) * 0.1
-        min -= (max - min) * 0.1
-        @view_max = max
-        @view_min = min
-
-        offset = zone.nr_offset = max - zone.ymax
-        scale = zone.nr_yscale = zone.height / (max - min)
-        zone.canvas.transform
-          scaleY: scale
-          translateY: (max - zone.ymax) + "px"
-
-        $("path.curve", zone.r.canvas).attr "stroke-width", (2 / scale) + "px"
-        $(this).trigger "scale-changed"
-        zone.render_ylabels(@view_max, @view_min, force_ylabel)
+        zone.on_view_change(start)
 
       set_draggable: ->
         left = @current_zoom * (Math.min(0, @nb_items() - @loaded_nb_items))
@@ -269,7 +238,7 @@ class TradeSpring.Chart
             @set_draggable()
           zone = @candle_zone
           zone.data_set[e.i - @loaded_offset] = e.prices
-          @on_view_change()  if e.prices[HIGH] > @view_max or e.prices[LOW] < @view_min
+          @on_view_change()  if e.prices[HIGH] > zone.view_max or e.prices[LOW] < zone.view_min
 
           if e.type == "bar"
             e.prices[6] = new timezoneJS.Date(e.prices[0])
@@ -493,7 +462,7 @@ class TradeSpring.Chart.Zone
             if @new_resize
               @r.setSize null, @ymax - @ymin  if @ymax - @ymin > @r.height
               @blanket.translate 0, (@ymax - oldmax)
-              @view.view_max = null
+              @view_max = null
               @view.on_view_change()
               return
             yscale = @height / (@ymax - @ymin)
@@ -504,6 +473,41 @@ class TradeSpring.Chart.Zone
             @blanket.attr scale: [ 1, yscale, 1, 1 ]
             @blanket.translate 0, (@ymax - oldmax) * yscale + @y * (1 - yscale / oldscale)
             @render_ylabels()  if @ylabels
+
+      on_view_change: (start) ->
+        d = @data_set.slice(start, start + @view.nb_items() + 1)
+        p = $("span.ylabel.display").map(->
+          parseFloat($(@).text()) or parseFloat($(".price", @).text())
+        ).get()
+        max = Math.max.apply(@, p.concat($.map(d, (data) ->
+          data[HIGH]
+        )))
+        min = Math.min.apply(@, p.concat($.map(d, (data) ->
+          data[LOW]
+        )))
+        if @view_max and @view_min and Math.abs(@view_max) != Infinity and Math.abs(@view_min) != Infinity
+          delta = @view_max - @view_min
+          if max > @view_max - delta * 0.05 or max < @view_max - delta * 0.1 or min < @view_min + delta * 0.05 or min > @view_min + delta * 0.1
+
+          else
+            return
+          return  if @view.view_lock_decrease and max - min < delta
+          force_ylabel = 1
+
+        max += (max - min) * 0.1
+        min -= (max - min) * 0.1
+        @view_max = max
+        @view_min = min
+
+        offset = @nr_offset = max - @ymax
+        scale = @nr_yscale = @height / (max - min)
+        @canvas.transform
+          scaleY: scale
+          translateY: (max - @ymax) + "px"
+
+        $("path.curve", @r.canvas).attr "stroke-width", (2 / scale) + "px"
+        $(@view).trigger "scale-changed"
+        @render_ylabels(@view_max, @view_min, force_ylabel) if @ylabels
 
       render_curve: (data_set, start_idx, color, n, fast) ->
         dx = 10
