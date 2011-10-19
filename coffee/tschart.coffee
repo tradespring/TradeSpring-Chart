@@ -252,7 +252,9 @@ class TradeSpring.Chart
             ++@cnt
             @r.setSize @canvas_width
             jQuery.each @zones, ->
-              @r.setSize @view.canvas_width  if @new_resize
+              if @new_resize
+                @r.setSize @view.canvas_width
+                @canvas_holder.css width: @view.canvas_width
 
             @canvas.css "width", @canvas_width
             @canvas.css left: parseInt(@canvas.css("left")) - @current_zoom
