@@ -51,7 +51,7 @@ class TSDraw.Arrow extends TSDraw.Widget
           fill: spec.c
           stroke: spec.c
         )
-        $(zone.view).bind "scale-changed", ->
+        $(zone).bind "scale-changed", ->
           arrow.attr("path", mk_path()).attr zone.offset_attr
           arrow.toFront()
 

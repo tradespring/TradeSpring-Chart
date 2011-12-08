@@ -537,7 +537,7 @@ class TradeSpring.Chart.Zone
           translateY: (max - @ymax) + "px"
 
         $("path.curve", @r.canvas).attr "stroke-width", (2 / scale) + "px"
-        $(@view).trigger "scale-changed"
+        $(@).trigger "scale-changed"
         @render_ylabels(@view_max, @view_min, force_ylabel) if @ylabels
 
       render_curve: (data_set, start_idx, color, n, fast) ->
