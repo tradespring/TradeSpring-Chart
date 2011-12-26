@@ -174,6 +174,12 @@ method init_simcalc_tf($sim, $data, $calc, $tf, $skey, $ready) {
                     datetime => $dt,
                     i => $calc->prices->count,
                 });
+                if (!$sim->{dhl}[0] || $price > $sim->{dhl}[0]) {
+                    $sim->{dhl}[0] = $price;
+                }
+                if (!$sim->{dhl}[1] || $price < $sim->{dhl}[1]) {
+                    $sim->{dhl}[1] = $price;
+                }
             }
         }
         else {
