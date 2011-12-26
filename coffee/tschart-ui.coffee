@@ -1,7 +1,5 @@
 exports ?= this
 TradeSpring = exports.TradeSpring ?= {}
-day_high = null
-day_low = null;
 
 class TradeSpring.ChartUI
   @init = (view, d, h) ->
@@ -53,6 +51,7 @@ class TradeSpring.ChartUI
           view.init_width()
           view.on_view_change()
 
+        h.prev = d.start_price;
         $('.prev', h).text(d.start_price);
 
 
@@ -77,30 +76,37 @@ class TradeSpring.ChartUI
           status.text("Server disconnected.  retry in ").append(timer).append try_now
           do_timer_update()
 
+  @set_day_high = (h, day_high, view) ->
+        if !h.day_high || day_high > h.day_high
+          h.day_high = day_high
+          $('.high', h).text(day_high)
+          view.price_label_high.text(day_high).css('top', view.candle_zone.val_to_y(day_high))
+
+
+  @set_day_low = (h, day_low, view) ->
+        if !h.day_low  || day_low  < h.day_low
+          h.day_low = day_low
+          $('.low', h).text(day_low);
+          view.price_label_low.text(day_low).css('top', view.candle_zone.val_to_y(day_low))
+
   @init_live_events = (view, hpipe, h) ->
-        $(hpipe).bind("message.tick", (e, d) ->
+        $(hpipe).bind("message.tick", (e, d) =>
                 view.on_new_event(d);
                 if h
-                  change = d.prices[CLOSE] - parseFloat($('.prev', h).text())
+                  change = d.prices[CLOSE] - h.prev
+                  h.last = d.prices[CLOSE]
                   $('.datetime', h).text(d.datetime)
-                  $('.current', h).text(d.prices[CLOSE])
+                  $('.current', h).text(h.last)
                   $('.change', h).text((if change >= 0 then '+' else '') + change.toString())
                   $('.volume', h).text(d.cumvol)
-                  if d.prices[CLOSE] > parseFloat($('.prev', h).text())
+                  if d.prices[CLOSE] > h.prev
                     $('.current', h).addClass('up').removeClass('down')
                     $('.change', h).addClass('up').removeClass('down')
                   else
                     $('.current', h).removeClass('up').addClass('down')
                     $('.change', h).removeClass('up').addClass('down')
-                if !day_high || d.prices[HIGH] > day_high
-                  day_high = d.prices[HIGH]
-                  $('.high', h).text(day_high)
-                  view.price_label_high.text(day_high).css('top', view.candle_zone.val_to_y(day_high))
-
-                if !day_low  || d.prices[LOW]  < day_low
-                  day_low = d.prices[LOW]
-                  $('.low', h).text(day_low);
-                  view.price_label_low.text(day_low).css('top', view.candle_zone.val_to_y(day_low))
+                @set_day_high(h, d.prices[HIGH], view)
+                @set_day_low(h, d.prices[LOW], view)
         ).bind("message.bar", (e, d) ->
             view.on_new_event(d)
         )

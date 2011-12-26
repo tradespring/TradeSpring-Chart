@@ -23,7 +23,7 @@
 var view, hpipe;
 var trlayout;
 var items = 600;
-
+var header = $('#header');
 
 $(function() {
     hpipe  = new Hippie.Pipe();
@@ -70,7 +70,7 @@ $(function() {
             view.volume_zone.render_bar(vols, d.start, c, 'Vol', 0, 0, 0, 0);
 
             view.init_columns();
-            TradeSpring.ChartUI.init_live_events(view, hpipe, $('#header'));
+            TradeSpring.ChartUI.init_live_events(view, hpipe, header);
 
         })
         .bind("message.tsstream.ivals", function(e, d) {
@@ -81,12 +81,14 @@ $(function() {
         })
         .bind("message.tsstream.init", function(e, d) {
             init_view(Math.min(d.count, items), d.count);
-            TradeSpring.ChartUI.init(view, d, $('#header'));
+            TradeSpring.ChartUI.init(view, d, header);
             hpipe.send({ type: 'tsstream.indicators',
                          indicators: [<% block indicators -> {%>'SMA(9)'<% } %>]
                        });
 
-            $('#header .session-name').text(d.session);
+            if (d.day_high) TradeSpring.ChartUI.set_day_high(header, d.day_high, view);
+            if (d.day_low)  TradeSpring.ChartUI.set_day_low(header, d.day_low, view);
+            $('.session-name', header).text(d.session);
             hpipe.send({ type: 'tsstream.history',
                          start: view.loaded_offset,
                          end: d.count-1
