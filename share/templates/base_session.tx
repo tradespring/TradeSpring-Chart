@@ -23,9 +23,9 @@
 var view, hpipe;
 var trlayout;
 var items = 600;
-var header = $('#header');
 
 $(function() {
+    var header = $('#header');
     hpipe  = new Hippie.Pipe();
     var ind_handlers = {};
 
