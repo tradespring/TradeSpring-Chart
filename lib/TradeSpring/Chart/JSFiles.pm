@@ -10,7 +10,7 @@ sub root {
 }
 
 sub files {
-    qw(jquery-1.6.2.js iscroll.js jquery.transform.js jquery.mousewheel.js jquery.alerts.js
+    qw(jquery-1.7.1.js iscroll.js jquery.transform.js jquery.mousewheel.js jquery.alerts.js
        timezone.js
        raphael.js plugins/raphael.path.methods.js
        plugins/raphael.primitives.js
