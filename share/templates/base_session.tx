@@ -27,7 +27,6 @@ var items = 600;
 $(function() {
     var header = $('#header');
     hpipe  = new Hippie.Pipe();
-    var ind_handlers = {};
 
     function init_view(items, cnt) {
         var width = $('.ui-layout-center').width() - 130;
@@ -39,10 +38,10 @@ $(function() {
         var zone  = view.new_zone({ y:  0,  height: 420});
         var zone2 = view.new_zone({ y: 430, height: 70});
 
-        ind_handlers['SMA(9)'] = mk_curve(zone, 'orange', 'SMA(9)');
-        ind_handlers['SMA(22)'] = mk_curve(zone, 'blue', 'SMA(22)');
-        ind_handlers['SMA(60)'] = mk_curve(zone, 'purple', 'SMA(60)');
-        ind_handlers['BOL']    = mk_band(zone, '#a0a000', 'BOL');
+        view.indicator_bind('SMA(9)', zone, 'Curve', 'orange');
+        view.indicator_bind('SMA(22)', zone, 'Curve', 'blue');
+        view.indicator_bind('SMA(60)', zone, 'Curve', 'purple');
+        view.indicator_bind('BOL', zone, 'Band', '#a0a000');
 %}
 
         $(window).resize(function() {
@@ -69,21 +68,20 @@ $(function() {
             }).get();
             view.volume_zone.render_bar(vols, d.start, c, 'Vol', 0, 0, 0, 0);
 
-            view.init_columns();
             TradeSpring.ChartUI.init_live_events(view, hpipe, header);
 
         })
         .bind("message.tsstream.ivals", function(e, d) {
-            ind_handlers[d.name].init(d);
+            view.indicator_init(d.name, d);
         })
         .bind("message.tsstream.ival", function(e, d) {
-            ind_handlers[d.name].val(d);
+            view.indicator_pub(d.name, d);
         })
         .bind("message.tsstream.init", function(e, d) {
             init_view(Math.min(d.count, items), d.count);
             TradeSpring.ChartUI.init(view, d, header);
             hpipe.send({ type: 'tsstream.indicators',
-                         indicators: [<% block indicators -> {%>'SMA(9)'<% } %>]
+                         indicators: view.indicator_names()
                        });
 
             if (d.day_high) TradeSpring.ChartUI.set_day_high(header, d.day_high, view);

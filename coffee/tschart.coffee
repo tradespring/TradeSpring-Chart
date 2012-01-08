@@ -13,6 +13,7 @@ class TradeSpring.Chart
           @[name] = val
         @tz ||= 'Asia/Taipei'
         @zones = []
+        @indicators = {}
         @current_zoom = 10
         @canvas_width = 10 * @items_to_load
         @chart_view = $("<div>").css(
@@ -363,6 +364,24 @@ class TradeSpring.Chart
         @blanket.remove()  if @blanket
         @blanket = @r.set()
 
+      indicator_bind: (name, zone, type, args...) ->
+        cb = "mk_" + type.toLowerCase();
+        arg0 = args.shift()
+        doit = =>
+          @indicators[name] = window[cb].apply(this, [zone, arg0, name].concat(args))
+        doit();
+        $(zone).bind('zone-reset', => doit());
+
+
+      indicator_names: ->
+        name for name of @indicators
+
+      indicator_init: (name, d) ->
+        @indicators[name].init(d)
+
+      indicator_pub: (name, d) ->
+        @indicators[name].val(d)
+
       load: (cb) ->
         req = 0
         @init_columns()
@@ -417,7 +436,8 @@ class TradeSpring.Chart.Zone
         if @ylabels
           $("span.ylabel.yaxis").remove()
           @ylabels = null
-        ->
+        =>
+          $(@).trigger('zone-reset');
           oldblanket.hide()
           oldblanket.remove()
 

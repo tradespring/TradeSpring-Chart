@@ -188,11 +188,11 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
 
 window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
-window.mk_candle_body = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
-window.mk_candle_background_base = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
+window.mk_candlebody = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
+window.mk_candlebackgroundbase = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
 window.mk_band = (args...) -> wrapper(TradeSpring.Widget.Band, args)
-window.mk_signal_arrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
-window.mk_sr = (args...) -> wrapper(TradeSpring.Widget.SRLine, args)
+window.mk_signalarrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
+window.mk_srline = (args...) -> wrapper(TradeSpring.Widget.SRLine, args)
 
 
 window.mk_debug = (zone) ->
@@ -293,7 +293,7 @@ window.mk_colorheat = (zone, mul) ->
     item = zone.render_bar_item(10 * d.i, mul, get_color(d.value), null, 1)
     zone.blanket.push item[0]
 
-window.mk_ann_arrow = (zone, mul) ->
+window.mk_annarrow = (zone, mul) ->
   get_color = (val) ->
     if val > 1
       "red"
@@ -389,12 +389,13 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
     @last_price = price
     @last_dir = dir
 
-window.mk_candle_background = (zone, color, base) ->
+window.mk_candlebackground = (zone, color, base) ->
+  base = zone.view.indicators[base].self
   render_item = (val, i) ->
     val = parseFloat(val)
     c = get_color(val)
     x = i * 10
-    height = base.self.get(i) - val
+    height = base.get(i) - val
     bar = zone.r.path().beginMulti().moveTo(x, zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
       opacity: 0.6
       "stroke-width": 10
