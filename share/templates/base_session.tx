@@ -39,9 +39,6 @@ $(function() {
         var zone2 = view.new_zone({ y: 430, height: 70});
 
         view.indicator_bind('SMA(9)', zone, 'Curve', 'orange');
-        view.indicator_bind('SMA(22)', zone, 'Curve', 'blue');
-        view.indicator_bind('SMA(60)', zone, 'Curve', 'purple');
-        view.indicator_bind('BOL', zone, 'Band', '#a0a000');
 %}
 
         $(window).resize(function() {
