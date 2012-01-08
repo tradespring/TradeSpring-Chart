@@ -69,7 +69,7 @@ class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
     @data[i - @zone.view.loaded_offset]
 
 wrapper = (klass, args) ->
-  c = new klass
+  c = Object.create(klass.prototype)
   klass.apply(c, args)
   init: (d) ->
     c.init(d)
