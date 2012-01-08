@@ -248,7 +248,6 @@ class TradeSpring.Chart
             oldbar = @tmpbar
             oldvol = @volbar
           if e.i > @cnt - 1
-            @add_column e.i - @loaded_offset
             @canvas_width += 10
             ++@cnt
             @r.setSize @canvas_width
@@ -357,13 +356,6 @@ class TradeSpring.Chart
         s.refresh()
         @on_view_change()
 
-      add_column: (i) ->
-        return
-
-      init_columns: ->
-        @blanket.remove()  if @blanket
-        @blanket = @r.set()
-
       indicator_bind: (name, zone, type, args...) ->
         cb = "mk_" + type.toLowerCase();
         arg0 = args.shift()
@@ -381,16 +373,6 @@ class TradeSpring.Chart
 
       indicator_pub: (name, d) ->
         @indicators[name].val(d)
-
-      load: (cb) ->
-        req = 0
-        @init_columns()
-        jQuery.each @zones, =>
-          ++req
-          @load =>
-            unless --req
-              @blanket.toFront()
-              cb()
 
 class TradeSpring.Chart.Zone
       constructor: (opt)->
