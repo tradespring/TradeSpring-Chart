@@ -192,6 +192,8 @@ window.mk_candle_body = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args
 window.mk_candle_background_base = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
 window.mk_band = (args...) -> wrapper(TradeSpring.Widget.Band, args)
 window.mk_signal_arrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
+window.mk_sr = (args...) -> wrapper(TradeSpring.Widget.SRLine, args)
+
 
 window.mk_debug = (zone) ->
   init: (d) ->
@@ -317,82 +319,75 @@ window.mk_ann_arrow = (zone, mul) ->
     item = zone.render_bar_item(10 * d.i, mul, get_color(d.value), null, 1)
     zone.blanket.push item[0]
 
-window.mk_sr = (zone, color) ->
-  pset = zone.r.set()
-  eset = zone.r.set()
-  zone.blanket.push pset
-  zone.blanket.push eset
-  last_dir = undefined
-  last_price = undefined
-  last_entry = undefined
-  my_length = undefined
-  px = undefined
-  ex = undefined
-  get_color = (val) ->
-    color[Math.abs(val) - 1]
-  render_item = (val, i) ->
-    dir = val[0]
-    price = val[1]
-    length = val[2]
-    entry_price = val[3]
+class TradeSpring.Widget.SRLine extends TradeSpring.Widget
+  constructor: (@zone, @colors = ['black', 'blue']) ->
+    @pset = @zone.r.set()
+    @eset = @zone.r.set()
+    @zone.blanket.push @pset
+    @zone.blanket.push @eset
+    @last_dir = undefined
+    @last_price = undefined
+    @last_entry = undefined
+    @my_length = undefined
+    @px = undefined
+    @ex = undefined
+
+  get_color: (val) ->
+    @colors[Math.abs(val) - 1]
+  render_item: (val, i) ->
+    [dir, price, length, entry_price] = val || []
+
     unless dir
-      last_dir = 0
-      last_price = null
-      last_entry = null
-      my_length = 0
+      @last_dir = 0
+      @last_price = null
+      @last_entry = null
+      @my_length = 0
       return
-    c = get_color(dir)
+
+    c = @get_color(dir)
     x = i * 10
-    if last_price and last_price != price
-      my_length = 1
+    if @last_price and @last_price != price
+      @my_length = 1
     else
-      my_length++
-    if px and my_length > 2
-      pset.pop()
-      px.remove()
-    if ex and my_length > 1
-      eset.pop()
-      ex.remove()
-    if !last_price
-      my_length = length
-    step = zone.r.path().beginMulti().moveTo(x + 5, zone.ymax - price).relatively().lineTo(-5 + (my_length - 1) * -10, 0)
+      @my_length++
+    if @px and @my_length > 2
+      @pset.pop()
+      @px.remove()
+    if @ex and @my_length > 1
+      @eset.pop()
+      @ex.remove()
+    if !@last_price
+      @my_length = length
+    step = @zone.r.path().beginMulti().moveTo(x + 5, @zone.ymax - price).relatively().lineTo(-5 + (@my_length - 1) * -10, 0)
     if entry_price
-      entry = zone.r.path().beginMulti().moveTo(x + 5, zone.ymax - entry_price).relatively().lineTo((my_length) * -10, 0).andUpdate().attr(
+      entry = @zone.r.path().beginMulti().moveTo(x + 5, @zone.ymax - entry_price).relatively().lineTo((@my_length) * -10, 0).andUpdate().attr(
         "stroke-opacity": 0.5
         "stroke-width": 1
         stroke: c
         "stroke-dasharray": "--"
-      ).attr(zone.offset_attr)
+      ).attr(@zone.offset_attr)
       entry.node.setAttribute "class", "curve"
-      ex = entry
-      eset.push ex
-      last_entry = entry_price
+      @ex = entry
+      @eset.push @ex
+      @last_entry = entry_price
     else
-      ex = null
-    if my_length == 1
-      if dir * last_dir > 0
-        lp = last_price
+      @ex = null
+    if @my_length == 1
+      if dir * @last_dir > 0
+        lp = @last_price
         ll = 0
-        step.absolutely().lineTo(x, zone.ymax - lp).relatively().lineTo(-5, 0).lineTo -10 * ll, 0
-    else
+        step.absolutely().lineTo(x, @zone.ymax - lp).relatively().lineTo(-5, 0).lineTo -10 * ll, 0
 
     step.andUpdate().attr(
       "stroke-opacity": 0.5
       "stroke-width": 2
       stroke: c
-    ).attr zone.offset_attr
+    ).attr @zone.offset_attr
     step.node.setAttribute "class", "curve"
-    px = step
-    pset.push px
-    last_price = price
-    last_dir = dir
-
-  init: (d) ->
-    $(d.values).each (idx) ->
-      render_item this, d.start + idx  if this?
-
-  val: (d) ->
-    render_item d.value, d.i
+    @px = step
+    @pset.push @px
+    @last_price = price
+    @last_dir = dir
 
 window.mk_candle_background = (zone, color, base) ->
   render_item = (val, i) ->
