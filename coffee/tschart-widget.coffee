@@ -389,7 +389,7 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
     @last_price = price
     @last_dir = dir
 
-window.mk_candlebackground = (zone, color, base) ->
+window.mk_candlebackground = (zone, color, name, base) ->
   base = zone.view.indicators[base].self
   render_item = (val, i) ->
     val = parseFloat(val)
