@@ -7,6 +7,10 @@ author   q{Chia-liang Kao <clkao@clkao.org>};
 license  'perl';
 
 build_requires 'Test::More';
+build_requires 'Class::Load';
+build_requires 'Redis::hiredis';
+build_requires 'Graph';
+build_requires 'Number::Extreme';
 
 requires 'Try::Tiny';
 requires 'Plack';
