@@ -80,8 +80,7 @@ method BUILD {
             $p->{prices} = $prices;
             our $PERIOD_TICK = 1;
             $p->set_timeframe($tf =~ m/ticks/ ? $PERIOD_TICK : Finance::GeniusTrader::DateTime::name_to_timeframe($tf) );
-            my $calc = Finance::GeniusTrader::Calculator->new($p);
-
+            my $calc = Finance::GeniusTrader::Calculator->new($p, $code);
             $client->subscribe($myself->bus->topic($ag_channel));
 
             my $id = $self->chart->get_indicators($bus, $calc, $tf, $live, $live->{key}, $ready);
