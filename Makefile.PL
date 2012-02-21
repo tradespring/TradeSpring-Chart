@@ -31,7 +31,7 @@ requires 'TradeSpring';
 requires 'TradeSpring::Broker';
 
 auto_include_deps;
-author_tests('xt');
+extra_tests;
 auto_set_repository;
 install_share;
 
