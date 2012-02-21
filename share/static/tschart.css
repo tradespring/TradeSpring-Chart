@@ -146,6 +146,10 @@ div.infobox {
   height: 600px;
   left: 10px;
   width: 800px;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -o-user-select: none;
 }  
 
 #connection-status {
