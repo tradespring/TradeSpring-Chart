@@ -22,6 +22,7 @@ class TradeSpring.Widget.Curve extends TradeSpring.Widget
   init: (d) ->
     @curve = @zone.render_curve(d.values, d.start, @color, @name, @fast)
     @curve.node.setAttribute "class", "curve"
+    @curve.node.setAttribute "id", @name
 
 class TradeSpring.Widget.Bar extends TradeSpring.Widget
   constructor: (@zone, @color = 'red', @name, @fast) ->
