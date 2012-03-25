@@ -22,8 +22,7 @@ class TradeSpring.Widget.Curve extends TradeSpring.Widget
       @curve = @zone.render_curve([ val ], i, @color, @name, @fast)
   init: (d) ->
     @curve = @zone.render_curve(d.values, d.start, @color, @name, @fast)
-    @curve.node.setAttribute "class", "curve"
-    @curve.node.setAttribute "id", @name
+    @curve.node.setAttribute "class", @name
     @label_pos = d.values.slice(-1)
 
 class TradeSpring.Widget.Bar extends TradeSpring.Widget
@@ -131,6 +130,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
         stroke: "none"
         "fill-opacity": 0.5
       ).toBack()
+      @pointer.node.setAttribute "class", @name
 
     xstart = i - if @last_up and @last_down then 1 else 0.5
     a = @zone.path([ [ "M", xstart * 10, ymax - @last_up ], [ "L", (i) * 10, ymax - up ], [ "L", (i) * 10, ymax - down ], [ "L", xstart * 10, ymax - @last_down ], [ "z" ] ]).attr(
@@ -139,6 +139,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
       stroke: "none"
       "fill-opacity": 0.5
     ).toBack()
+    a.node.setAttribute "class", @name
     @zone.blanket.push a
     if @annotate
       text = Math.round(down) + " - " + Math.round(up)
@@ -150,6 +151,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
           "text-anchor": "left"
         ).toBack()
         @label.translate -$(@label.node).width() / 2
+        @label.node.setAttribute "class", @name
         @zone.blanket.push @label
         @annotate_cb()  if @annotate_cb
     @last_up = up
@@ -188,6 +190,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
     @last_up = d.values[d.values.length - 1][0]
     @last_down = d.values[d.values.length - 1][1]
 
+    _area.node.setAttribute "class", @name
     @label_pos = (@last_up + @last_down)/2
 
 

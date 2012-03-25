@@ -371,7 +371,7 @@ class TradeSpring.Chart
           background: arg0
         ).appendTo(@holder)
 
-        indicator_spec = 'path#' + name.replace(/([\(\)])/g, "\\$1")
+        indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
         @indicators[name].label.toggle(
             ->
                 $(indicator_spec).hide()
