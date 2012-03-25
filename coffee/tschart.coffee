@@ -362,9 +362,14 @@ class TradeSpring.Chart
         doit = =>
           @indicators[name] = window[cb].apply(this, [zone, arg0, name].concat(args))
         doit();
+        indicator_spec = 'path#' + name.replace(/([\(\)])/g, "\\$1")
         new_element = $("<div/>").text(name).appendTo($('body'));
-        new_element.click ->
-            $('path#' + name.replace(/([\(\)])/g, "\\$1") ).hide();
+        new_element.toggle(
+            ->
+                $(indicator_spec).hide()
+            ->
+                $(indicator_spec).show()
+        )
         $(zone).bind('zone-reset', => doit());
 
 
