@@ -83,6 +83,7 @@ class TradeSpring.Chart
         @canvas.css "left", @nb_items() * @current_zoom - @canvas_width * @current_zoom / 10
         @offset = @loaded_offset + @loaded_nb_items - @nb_items()
         @price_label.css "left", 5 + @x + @width
+        @indicators[name].label.text(name).css "left", 5 + @x + @width for name of @indicators
         @price_label_high.css "left", 5 + @x + @width
         @price_label_low.css "left", 5 + @x + @width
         $("div.yaxis-line").css(
@@ -362,14 +363,22 @@ class TradeSpring.Chart
         doit = =>
           @indicators[name] = window[cb].apply(this, [zone, arg0, name].concat(args))
         doit();
+
+        @indicators[name].label = $("<span/>").addClass("ylabel").css(
+          position: "absolute"
+          left: 5 + @x + @width
+          top: 0
+          background: arg0
+        ).appendTo(@holder)
+
         indicator_spec = 'path#' + name.replace(/([\(\)])/g, "\\$1")
-        new_element = $("<div/>").text(name).appendTo($('body'));
-        new_element.toggle(
+        @indicators[name].label.toggle(
             ->
                 $(indicator_spec).hide()
             ->
                 $(indicator_spec).show()
         )
+
         $(zone).bind('zone-reset', => doit());
 
 
@@ -378,9 +387,21 @@ class TradeSpring.Chart
 
       indicator_init: (name, d) ->
         @indicators[name].init(d)
+        widget = @indicators[name].self
+        label = @indicators[name].label
+        @update_label_pos(widget, label) if widget
 
       indicator_pub: (name, d) ->
         @indicators[name].val(d)
+        widget = @indicators[name].self
+        label = @indicators[name].label
+        @update_label_pos(widget, label) if widget
+
+      update_label_pos: (widget, label) ->
+          pos = widget.label_pos
+          yval = widget.zone.val_to_y(pos)
+          label.get(0).price = pos
+          label.css("top", yval)
 
 class TradeSpring.Chart.Zone
       constructor: (opt)->
