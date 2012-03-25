@@ -35,7 +35,14 @@ method _build_tsloader {
 }
 
 method _build_tsindicator_frame {
-    TradeSpring::Frame->new( calc => $self->calc );
+    my $meta = TradeSpring::Frame->meta->create(
+        join(q{::} => 'TradeSpring::Frame', 'WithDayTrade'),
+        superclasses => [ 'TradeSpring::Frame' ],
+        roles        => ['TradeSpring::DayTrade'],
+        cache        => 1,
+    );
+
+    $meta->name->new( calc => $self->calc );
 }
 
 method init($spec) {
