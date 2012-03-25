@@ -394,6 +394,7 @@ window.mk_candlebackground = (zone, color, name, base) ->
   base = zone.view.indicators[base].self
   render_item = (val, i) ->
     val = parseFloat(val)
+    return if (isNaN(val))
     c = get_color(val)
     x = i * 10
     height = base.get(i) - val
