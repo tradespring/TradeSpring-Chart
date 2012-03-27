@@ -70,6 +70,26 @@ class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
   get: (i) ->
     @data[i - @zone.view.loaded_offset]
 
+class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
+  constructor: (@zone, @color = 'orange', @name, @base) ->
+    @base = zone.view.indicators[@base].self
+  render_item: (val, i) ->
+    val = parseFloat(val)
+    return if (isNaN(val))
+    c = @get_color(val)
+    x = i * 10
+    height = @base.get(i) - val
+    bar = @zone.r.path().beginMulti().moveTo(x, @zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
+      opacity: 0.6
+      "stroke-width": 10
+      stroke: (if height > 0 then "green" else "red")
+    ).attr(@zone.offset_attr).toBack()
+    @zone.blanket.push bar
+  get_color: (val) ->
+    (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
+  val: (d) ->
+    @render_item d.value, d.i
+
 wrapper = (klass, args) ->
   c = Object.create(klass.prototype)
   klass.apply(c, args)
@@ -198,6 +218,7 @@ window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
 window.mk_candlebody = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
 window.mk_candlebackgroundbase = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
+window.mk_candlebackground = (args...) -> wrapper(TradeSpring.Widget.CandleBackground, args)
 window.mk_band = (args...) -> wrapper(TradeSpring.Widget.Band, args)
 window.mk_signalarrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
 window.mk_srline = (args...) -> wrapper(TradeSpring.Widget.SRLine, args)
@@ -396,27 +417,3 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
     @pset.push @px
     @last_price = price
     @last_dir = dir
-
-window.mk_candlebackground = (zone, color, name, base) ->
-  base = zone.view.indicators[base].self
-  render_item = (val, i) ->
-    val = parseFloat(val)
-    return if (isNaN(val))
-    c = get_color(val)
-    x = i * 10
-    height = base.get(i) - val
-    bar = zone.r.path().beginMulti().moveTo(x, zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
-      opacity: 0.6
-      "stroke-width": 10
-      stroke: (if height > 0 then "green" else "red")
-    ).attr(zone.offset_attr).toBack()
-    zone.blanket.push bar
-  get_color = (val) ->
-    (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
-
-  init: (d) ->
-    $(d.values).each (idx) ->
-      render_item this, d.start + idx  if this?
-
-  val: (d) ->
-    render_item d.value, d.i
