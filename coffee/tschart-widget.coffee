@@ -60,8 +60,6 @@ class TradeSpring.Widget.CandleBody extends TradeSpring.Widget
   get_color: (val) ->
     (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
 
-
-
 class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
   constructor: (@zone) ->
     @data = {}
@@ -215,6 +213,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
 
 
 window.mk_rect = (args...) -> wrapper(TradeSpring.Widget.Rect, args)
+window.mk_ellipse = (args...) -> wrapper(TradeSpring.Widget.Ellipse, args)
 window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
 window.mk_candlebody = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
@@ -260,37 +259,32 @@ class TradeSpring.Widget.Rect extends TradeSpring.Widget
               @us.push @lx
               @last_start = i - rect[2]
 
-window.mk_ellipse = (zone, color, name) ->
-  last_start = undefined
-  rx = undefined
-  lx = undefined
-  us = zone.r.set()
-  zone.blanket.push us
-  render_item = (spec, i) ->
-    if rx and last_start == i - spec[2]
-      us.pop()
-      rx.remove()
-      lx.remove()
+class TradeSpring.Widget.Ellipse extends TradeSpring.Widget
+  constructor: (@zone, @color, @name) ->
+    @last_start = undefined
+    @rx = undefined
+    @lx = undefined
+    @us = @zone.r.set()
+    @zone.blanket.push @us
+  render_item: (spec, i) ->
+    if @rx and @last_start == i - spec[2]
+      @us.pop()
+      @rx.remove()
+      @lx.remove()
     h = parseFloat(spec[0])
     l = parseFloat(spec[1])
-    rx = zone.ellipse(10 * (i - spec[2] / 2), (h + l) / 2, (spec[2] / 2) * 10, (h - l) / 2).attr(
+    @rx = @zone.ellipse(10 * (i - spec[2] / 2), (h + l) / 2, (spec[2] / 2) * 10, (h - l) / 2).attr(
       "stroke-width": 2
-      stroke: color
+      stroke: @color
     )
-    lx = zone.rect(10 * (i - spec[2]) - 10, (parseInt(spec[0]) + parseInt(spec[1])) / 2, spec[2] * 10 + 20, 0.5).attr(
+    @lx = @zone.rect(10 * (i - spec[2]) - 10, (parseInt(spec[0]) + parseInt(spec[1])) / 2, spec[2] * 10 + 20, 0.5).attr(
       "stroke-width": 1
       stroke: "gray"
       fill: "gray"
     )
-    us.push rx
-    us.push lx
-    last_start = i - spec[2]
-  init: (d) ->
-    jQuery(d.values).each (idx) ->
-      render_item this, d.start + idx  if this? and this[0]?
-
-  val: (d) ->
-    render_item d.value, d.i  if d.value? and d.value[0]?
+    @us.push @rx
+    @us.push @lx
+    @last_start = i - spec[2]
 
 window.mk_colorheat = (zone, mul) ->
   get_color = (val) ->
