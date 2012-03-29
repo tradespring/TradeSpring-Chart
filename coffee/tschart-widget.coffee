@@ -214,6 +214,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
     @label_pos = (@last_up + @last_down)/2
 
 
+window.mk_rect = (args...) -> wrapper(TradeSpring.Widget.Rect, args)
 window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
 window.mk_candlebody = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
@@ -231,38 +232,33 @@ window.mk_debug = (zone) ->
   val: (d) ->
     console.log "val", d.values
 
-window.mk_rect = (zone, color, name, attr) ->
-  last_start = undefined
-  rx = undefined
-  lx = undefined
-  us = zone.r.set()
-  ob = zone.blanket
-  ob.push us
-  render_item = (rect, i) ->
-    if rx and last_start == i - rect[2]
-      us.pop()
-      rx.remove()
-      lx.remove()
-    rx = zone.rect(10 * (i - rect[2]) - 5, rect[0], rect[2] * 10 + 10, rect[0] - rect[1]).attr(
-      "stroke-width": 2
-      stroke: color
-    )
-    lx = zone.r.path().moveTo(10 * (i - rect[2]) - 10, zone.ymax - (parseInt(rect[0]) + parseInt(rect[1])) / 2).relatively().lineTo(rect[2] * 10 + 20, 0).attr(
-      "stroke-width": 1
-      stroke: "gray"
-    ).attr(zone.offset_attr)
-    if attr
-      rx.attr attr
-      lx.attr attr
-    us.push rx
-    us.push lx
-    last_start = i - rect[2]
-  init: (d) ->
-    jQuery(d.values).each (idx) ->
-      render_item this, d.start + idx  if this? and this[0]?
-
-  val: (d) ->
-    render_item d.value, d.i  if d.value? and d.value[0]?
+class TradeSpring.Widget.Rect extends TradeSpring.Widget
+  constructor: (@zone, @color, @name, @attr) ->
+      @last_start = undefined
+      @rx = undefined
+      @lx = undefined
+      @us = @zone.r.set()
+      ob = @zone.blanket
+      ob.push @us
+  render_item: (rect, i) ->
+      if @rx and @last_start == i - rect[2]
+          @us.pop()
+          @rx.remove()
+          @lx.remove()
+          @rx = @zone.rect(10 * (i - rect[2]) - 5, rect[0], rect[2] * 10 + 10, rect[0] - rect[1]).attr(
+              "stroke-width": 2
+              stroke: @color
+          )
+          @lx = @zone.r.path().moveTo(10 * (i - rect[2]) - 10, @zone.ymax - (parseInt(rect[0]) + parseInt(rect[1])) / 2).relatively().lineTo(rect[2] * 10 + 20, 0).attr(
+              "stroke-width": 1
+              stroke: "gray"
+          ).attr(@zone.offset_attr)
+          if attr
+              @rx.attr attr
+              @lx.attr attr
+              @us.push @rx
+              @us.push @lx
+              @last_start = i - rect[2]
 
 window.mk_ellipse = (zone, color, name) ->
   last_start = undefined
