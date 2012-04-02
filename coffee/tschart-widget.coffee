@@ -77,6 +77,7 @@ class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
     c = @get_color(val)
     x = i * 10
     height = @base.get(i) - val
+    @label_pos = (@base.get(i) + val)/2
     bar = @zone.r.path().beginMulti().moveTo(x, @zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
       opacity: 0.6
       "stroke-width": 10
