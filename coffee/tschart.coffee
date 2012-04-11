@@ -471,7 +471,7 @@ class TradeSpring.Chart.Zone
             @r.setSize null, @ymax - @ymin  if @ymax - @ymin > @r.height
             yscale = 1
           @offset_attr =
-            translation: [ @x - (@view.loaded_offset * 10), 0 ]
+            translation: [ @x - (@view.loaded_offset * 10), @y / yscale ]
             scale: [ 1, yscale, 1, 1 ]
 
           @render_ylabels()  if @ylabels
