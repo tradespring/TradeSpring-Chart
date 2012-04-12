@@ -30,6 +30,20 @@ div#trade-header {
 
 }
 
+span.xlabel.cursor {
+    -webkit-transform: rotateZ(-10deg);
+    -webkit-transition-property: top;
+    -webkit-transition-duration: 0.1s;
+    -webkit-transition-timing-function: easeout;
+    -moz-transform: rotate(-10deg);
+    -moz-transition-property: top;
+    -moz-transition-duration: 0.1s;
+    -moz-transition-timing-function: easeout;
+    background-color: orange;
+    color: white;
+    z-index: 9;
+}
+
 span.ylabel.cursor {
     -webkit-transform: rotateZ(-10deg);
     -webkit-transition-property: top;

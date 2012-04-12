@@ -58,6 +58,11 @@ class TradeSpring.Chart
         @loaded_nb_items = @items_to_load
         @loaded_offset = @cnt - @items_to_load
 
+        @date_label = $("<span/>").addClass("xlabel").addClass("cursor").css(
+          position: "absolute"
+          top: 5 + @x + @height
+        ).appendTo(@holder)
+
         @price_label = $("<span/>").addClass("ylabel").addClass("cursor").css(
           position: "absolute"
           left: 5 + @x + @width
@@ -82,6 +87,7 @@ class TradeSpring.Chart
         @chart_view.css "width", @width
         @canvas.css "left", @nb_items() * @current_zoom - @canvas_width * @current_zoom / 10
         @offset = @loaded_offset + @loaded_nb_items - @nb_items()
+        @date_label.css "top", 5 + @x + @height
         @price_label.css "left", 5 + @x + @width
         @indicators[name].label.text(name).css "left", 5 + @x + @width for name of @indicators
         @price_label_high.css "left", 5 + @x + @width
@@ -197,9 +203,16 @@ class TradeSpring.Chart
               e = e.originalEvent.touches[0]  if e.originalEvent.touches
               return true if !e
               scaled_y = e.pageY - zone.canvas_holder.offset().top
+              scaled_x = e.pageX - zone.canvas_holder.offset().left
               offY = scaled_y / zone.nr_yscale - zone.nr_offset
+              offX = e.pageX - @canvas.offset().left
+              x = Math.floor(offX / @current_zoom + 0.5)
               hcursor.css "top", scaled_y
               y = @candle_zone.offset_to_val(offY)
+
+              if @candle_zone.data_set? && @candle_zone.data_set[x]?
+                  datetime = @candle_zone.data_set[x][0]
+                  @date_label.text(datetime).css left: e.pageX
               @price_label.text(y).css top: scaled_y
               true
 
