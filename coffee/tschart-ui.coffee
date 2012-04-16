@@ -1,5 +1,5 @@
-exports ?= this
-TradeSpring = exports.TradeSpring ?= {}
+@TradeSpring ?= {}
+exports = @TradeSpring
 
 class TradeSpring.ChartUI
   @init = (view, d, h) ->

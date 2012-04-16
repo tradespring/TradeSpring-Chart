@@ -1,5 +1,5 @@
-exports ?= this
-TSDraw = exports.TSDraw ?= {}
+@TSDraw ?= {}
+exports = @TSDraw
 
 
 class TSDraw.Widget

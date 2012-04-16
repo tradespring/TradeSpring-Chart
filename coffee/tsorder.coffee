@@ -1,5 +1,5 @@
-exports ?= this
-TradeSpring = exports.TradeSpring ?= {}
+@TradeSpring ?= {}
+exports = @TradeSpring
 
 brokers = {}
 curernt_torder = undefined
