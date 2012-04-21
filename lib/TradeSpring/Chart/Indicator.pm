@@ -35,12 +35,13 @@ method _build_tsloader {
 }
 
 method _build_tsindicator_frame {
-    my $meta = TradeSpring::Frame->meta->create(
+    my $meta = $self->calc->prices->timeframe < $Finance::GeniusTrader::DateTime::DAY
+        ? TradeSpring::Frame->meta->create(
         join(q{::} => 'TradeSpring::Frame', 'WithDayTrade'),
         superclasses => [ 'TradeSpring::Frame' ],
         roles        => ['TradeSpring::DayTrade'],
         cache        => 1,
-    );
+    ) : TradeSpring::Frame->meta;
 
     $meta->name->new( calc => $self->calc );
 }
