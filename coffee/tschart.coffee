@@ -14,6 +14,8 @@ class TradeSpring.Chart
         @tz ||= 'Asia/Taipei'
         @zones = []
         @indicators = {}
+        @indicator_groups ?= {}
+        @group_count = 0
         @current_zoom = 10
         @canvas_width = 10 * @items_to_load
         @chart_view = $("<div>").css(
@@ -90,6 +92,7 @@ class TradeSpring.Chart
         @date_label.css "top", 5 + @x + @height
         @price_label.css "left", 5 + @x + @width
         @indicators[name].label.text(name).css "left", 5 + @x + @width for name of @indicators
+        @indicator_groups[group].label.text(group).css "left", 5 + @x + @width for group of @indicator_groups
         @price_label_high.css "left", 5 + @x + @width
         @price_label_low.css "left", 5 + @x + @width
         $("div.yaxis-line").css(
@@ -370,7 +373,7 @@ class TradeSpring.Chart
         s.refresh()
         @on_view_change()
 
-      indicator_bind: (name, zone, type, args...) ->
+      indicator_bind: (name, zone, type, group, args...) ->
         cb = "mk_" + type.toLowerCase();
         arg0 = args.shift()
         doit = =>
@@ -383,6 +386,33 @@ class TradeSpring.Chart
           top: 0
           background: arg0
         ).appendTo(@holder)
+
+        if @indicator_groups[group]?
+            @indicator_groups[group].namelist.push name
+        else
+            @group_count++
+            @indicator_groups[group] = {
+                label: $("<span/>").addClass("ylabel").css(
+                    position: "absolute"
+                    left: 5 + @x + @width
+                    top: 20 + @group_count * 20
+                    background: arg0
+                ).appendTo(@holder)
+
+                namelist: [name]
+            }
+
+        that = this
+        @indicator_groups[group].label.toggle(
+            ->
+                for tname in that.indicator_groups[group].namelist
+                    indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+                    $(indicator_spec).hide()
+            ->
+                for tname in that.indicator_groups[group].namelist
+                    indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+                    $(indicator_spec).show()
+        )
 
         indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
         @indicators[name].label.toggle(

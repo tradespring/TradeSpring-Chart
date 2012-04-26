@@ -370,6 +370,10 @@ method allowed_indicators($session, $tf) {
     return {
         'SMA(9)' => { class => 'SMA',
                       args => { n => 9 } },
+        'SMA(15)' => { class => 'SMA',
+                      args => { n => 15 } },
+        'SMA(30)' => { class => 'SMA',
+                      args => { n => 30 } },
     }
 }
 
