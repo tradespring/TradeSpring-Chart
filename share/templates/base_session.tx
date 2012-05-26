@@ -15,7 +15,7 @@
 
 <link rel="stylesheet" href="/static/screen.css" type="text/css" />
 % block css -> {
-<link rel="stylesheet" href="/static/tschart.css" type="text/css" />
+<link rel="stylesheet" href="/static/gen/tschart.css" type="text/css" />
 <link href="/static/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
 % }
 

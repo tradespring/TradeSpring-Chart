@@ -40,14 +40,16 @@ auto_set_repository;
 install_share;
 
 clean_files "share/static/gen/*.js";
+clean_files "share/static/gen/*.sass";
 
 WriteAll;
 
 sub MY::postamble {
     return <<'MAKE_FRAG';
-all:: buildjs
+all:: build_css_and_jss
 
-buildjs:
+build_css_and_jss:
 	$(PERL) utils/build.pl
+
 MAKE_FRAG
 }
