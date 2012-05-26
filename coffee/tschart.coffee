@@ -373,7 +373,7 @@ class TradeSpring.Chart
         s.refresh()
         @on_view_change()
 
-      indicator_bind: (name, zone, type, group, args...) ->
+      indicator_bind: (name, zone, type, args...) ->
         cb = "mk_" + type.toLowerCase();
         arg0 = args.shift()
         doit = =>
@@ -387,6 +387,19 @@ class TradeSpring.Chart
           background: arg0
         ).appendTo(@holder)
 
+        indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
+        @indicators[name].label.toggle(
+            ->
+                $(indicator_spec).hide()
+            ->
+                $(indicator_spec).show()
+        )
+
+        $(zone).bind('zone-reset', => doit());
+
+      indicator_bind_with_group: (name, zone, type, group, args...) ->
+        @indicator_bind(name, zone, type, args...)
+
         if @indicator_groups[group]?
             @indicator_groups[group].namelist.push name
         else
@@ -396,7 +409,7 @@ class TradeSpring.Chart
                     position: "absolute"
                     left: 5 + @x + @width
                     top: 20 + @group_count * 20
-                    background: arg0
+                    background: args.shift()
                 ).appendTo(@holder)
 
                 namelist: [name]
@@ -413,17 +426,6 @@ class TradeSpring.Chart
                     indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
                     $(indicator_spec).show()
         )
-
-        indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
-        @indicators[name].label.toggle(
-            ->
-                $(indicator_spec).hide()
-            ->
-                $(indicator_spec).show()
-        )
-
-        $(zone).bind('zone-reset', => doit());
-
 
       indicator_names: ->
         name for name of @indicators

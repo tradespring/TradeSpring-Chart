@@ -38,9 +38,9 @@ $(function() {
         var zone  = view.new_zone({ y:  0,  height: 420});
         var zone2 = view.new_zone({ y: 430, height: 70});
 
-        view.indicator_bind('SMA(9)', zone, 'Curve', 'MA', 'orange');
-        view.indicator_bind('SMA(15)', zone, 'Curve', 'MA', 'yellow');
-        view.indicator_bind('SMA(30)', zone, 'Curve', 'MA', 'blue');
+        view.indicator_bind_with_group('SMA(9)', zone, 'Curve', 'MA', 'orange');
+        view.indicator_bind_with_group('SMA(15)', zone, 'Curve', 'MA', 'yellow');
+        view.indicator_bind_with_group('SMA(30)', zone, 'Curve', 'MA', 'blue');
 %}
 
         $(window).resize(function() {
