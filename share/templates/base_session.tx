@@ -17,6 +17,7 @@
 % block css -> {
 <link rel="stylesheet" href="/static/gen/tschart.css" type="text/css" />
 <link href="/static/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+<link rel="stylesheet" href="/static/bootstrap.css" type="text/css" />
 % }
 
 <script type="text/javascript">
@@ -184,7 +185,9 @@ Connecting...
 <input id="date" type="date">
 <input id="go" type="button" value="go">
 <input id="end" type="button" value=">>>>|">
+<a class="btn" data-toggle="modal" href="#IndicatorSettings" >Settings</a>
 % }
+% include 'indicator_settings.tx'
 
 % if $order {
 % include 'order-init.tx'
@@ -196,6 +199,8 @@ $(function() {
     hpipe.init();
 })
 </script>
+
+<script src="/static/bootstrap-modal.js"></script>
 
 </body>
 </html>

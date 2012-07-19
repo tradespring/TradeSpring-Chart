@@ -9,6 +9,7 @@ exports.VOLUME = 5
 
 class TradeSpring.Chart
       constructor: (opt)->
+        $('#IndicatorSettings').hide()
         for name, val of opt
           @[name] = val
         @tz ||= 'Asia/Taipei'
@@ -404,13 +405,12 @@ class TradeSpring.Chart
             @indicator_groups[group].namelist.push name
         else
             @group_count++
+            labelbox = $("<label/>").addClass("checkbox").appendTo($('.modal-body'))
+            $(labelbox).text(group)
             @indicator_groups[group] = {
-                label: $("<span/>").addClass("ylabel").css(
-                    position: "absolute"
-                    left: 5 + @x + @width
-                    top: 20 + @group_count * 20
+                label: $("<input type='checkbox' />").css(
                     background: args.shift()
-                ).appendTo(@holder)
+                ).appendTo($(labelbox))
 
                 namelist: [name]
             }
@@ -418,10 +418,12 @@ class TradeSpring.Chart
         that = this
         @indicator_groups[group].label.toggle(
             ->
+                that.indicator_groups[group].label.checked = false
                 for tname in that.indicator_groups[group].namelist
                     indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
                     $(indicator_spec).hide()
             ->
+                that.indicator_groups[group].label.checked = true
                 for tname in that.indicator_groups[group].namelist
                     indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
                     $(indicator_spec).show()
