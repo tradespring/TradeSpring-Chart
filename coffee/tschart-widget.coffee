@@ -4,6 +4,7 @@ exports = @TradeSpring
 class TradeSpring.Widget
   constructor: (@zone) ->
       @is_display = true
+      @self = @
   init: (d) ->
     @render_item v, d.start + parseInt(i) for i, v of d.values
 

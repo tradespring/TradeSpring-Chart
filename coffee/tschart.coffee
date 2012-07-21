@@ -374,7 +374,7 @@ class TradeSpring.Chart
         cb = "mk_" + type.toLowerCase()
         arg0 = args.shift()
         doit = =>
-          @indicators[name] = window[cb].apply(this, [zone, arg0, name].concat(args))
+          @indicators[name] = new TradeSpring.Widget[type](zone, arg0, name, args...)
         doit()
 
         labelbox = $("<label/>").addClass("checkbox").attr("id", name).css(
