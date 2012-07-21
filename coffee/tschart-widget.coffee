@@ -3,6 +3,7 @@ exports = @TradeSpring
 
 class TradeSpring.Widget
   constructor: (@zone) ->
+      @is_display = true
   init: (d) ->
     @render_item v, d.start + parseInt(i) for i, v of d.values
 
@@ -21,9 +22,11 @@ class TradeSpring.Widget.Curve extends TradeSpring.Widget
     else
       @curve = @zone.render_curve([ val ], i, @color, @name, @fast)
       @curve.node.setAttribute "class", @name
+      $(@curve.node).hide() unless @is_display
   init: (d) ->
     @curve = @zone.render_curve(d.values, d.start, @color, @name, @fast)
     @curve.node.setAttribute "class", @name
+
 
 class TradeSpring.Widget.Bar extends TradeSpring.Widget
   constructor: (@zone, @color = 'red', @name, @fast) ->
@@ -40,6 +43,7 @@ class TradeSpring.Widget.Bar extends TradeSpring.Widget
     else
       @bar = 1
       @bar.node.setAttribute "class", @name
+      $(@bar.node).hide() unless @is_display
       @zone.render_bar [ val ], i, null, @name, 0, 0, @fast
   init: (d) ->
     @bar = 1
@@ -61,6 +65,7 @@ class TradeSpring.Widget.CandleBody extends TradeSpring.Widget
       stroke: c
     ).attr(@zone.offset_attr)
     bar.node.setAttribute "class", @name
+    $(bar.node).hide() unless @is_display
     @zone.blanket.push bar
   get_color: (val) ->
     (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
@@ -90,6 +95,7 @@ class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
       stroke: (if height > 0 then "green" else "red")
     ).attr(@zone.offset_attr).toBack()
     bar.node.setAttribute "class", @name
+    $(bar.node).hide() unless @is_display
     @zone.blanket.push bar
   get_color: (val) ->
     (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
@@ -121,6 +127,7 @@ class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
       direction: val,
       c: @color)
     arrow.node.setAttribute "class", @name
+    $(arrow.node).hide() unless @is_display
     @zone.blanket.push arrow
 
 class TradeSpring.Widget.Band extends TradeSpring.Widget
@@ -160,6 +167,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
         "fill-opacity": 0.5
       ).toBack()
       @pointer.node.setAttribute "class", @name
+      $(@pointer.node).hide() unless @is_display
 
     xstart = i - if @last_up and @last_down then 1 else 0.5
     a = @zone.path([ [ "M", xstart * 10, ymax - @last_up ], [ "L", (i) * 10, ymax - up ], [ "L", (i) * 10, ymax - down ], [ "L", xstart * 10, ymax - @last_down ], [ "z" ] ]).attr(
@@ -169,6 +177,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
       "fill-opacity": 0.5
     ).toBack()
     a.node.setAttribute "class", @name
+    $(a.node).hide() unless @is_display
     @zone.blanket.push a
     if @annotate
       text = Math.round(down) + " - " + Math.round(up)
@@ -181,6 +190,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
         ).toBack()
         @label.translate -$(@label.node).width() / 2
         @label.node.setAttribute "class", @name
+        $(@label.node).hide() unless @is_display
         @zone.blanket.push @label
         @annotate_cb()  if @annotate_cb
     @last_up = up
@@ -398,6 +408,7 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
         "stroke-dasharray": "--"
       ).attr(@zone.offset_attr)
       entry.node.setAttribute "class", "curve"
+      $(entry.node).hide() unless @is_display
       @ex = entry
       @eset.push @ex
       @last_entry = entry_price
@@ -415,6 +426,7 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
       stroke: c
     ).attr @zone.offset_attr
     step.node.setAttribute "class", "curve"
+    $(step.node).hide() unless @is_display
     @px = step
     @pset.push @px
     @last_price = price
