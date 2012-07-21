@@ -2,7 +2,7 @@ exports ?= this
 TradeSpring = exports.TradeSpring ?= {}
 
 class TradeSpring.Widget
-  constructor: (@zone, @type, @name) ->
+  constructor: (@zone, @name) ->
   init: (d) ->
     @render_item v, d.start + parseInt(i) for i, v of d.values
 
@@ -10,7 +10,7 @@ class TradeSpring.Widget
     @render_item d.value, d.i
 
 class TradeSpring.Widget.Curve extends TradeSpring.Widget
-  constructor: (@zone, @color = 'orange', @type, @name, @fast) ->
+  constructor: (@zone, @color = 'orange', @name, @fast) ->
   render_item: (val, i) ->
     unless val?
       @curve = null
@@ -27,7 +27,7 @@ class TradeSpring.Widget.Curve extends TradeSpring.Widget
     @label_pos = d.values.slice(-1)
 
 class TradeSpring.Widget.Bar extends TradeSpring.Widget
-  constructor: (@zone, @color = 'red', @type, @name, @fast) ->
+  constructor: (@zone, @color = 'red', @name, @fast) ->
   render_item: (val, i) ->
     i = parseInt(i)
     unless val?
@@ -47,7 +47,7 @@ class TradeSpring.Widget.Bar extends TradeSpring.Widget
     @zone.render_bar d.values, d.start, @color, @name, 0, 0, @fast
 
 class TradeSpring.Widget.CandleBody extends TradeSpring.Widget
-  constructor: (@zone, @color = 'red',@type, @name) ->
+  constructor: (@zone, @color = 'red', @name) ->
   render_item: (val, i) ->
     data = @zone.data_set[i - @zone.view.loaded_offset]
     val = parseInt(val)
@@ -65,7 +65,7 @@ class TradeSpring.Widget.CandleBody extends TradeSpring.Widget
     (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
 
 class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
-  constructor: (@zone, @type, @name) ->
+  constructor: (@zone, @name) ->
     @data = {}
   render_item: (val, i) ->
     @data[i - @zone.view.loaded_offset] = val
@@ -73,7 +73,7 @@ class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
     @data[i - @zone.view.loaded_offset]
 
 class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
-  constructor: (@zone, @color = 'orange', @type, @name, @base) ->
+  constructor: (@zone, @color = 'orange', @name, @base) ->
     @base = zone.view.indicators[@base].self
   render_item: (val, i) ->
     val = parseFloat(val)
@@ -104,7 +104,7 @@ wrapper = (klass, args) ->
   self: c
 
 class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
-  constructor: (@zone, @color = 'black', @type, @name) ->
+  constructor: (@zone, @color = 'black', @name) ->
   render_item: (val, i) ->
     price = undefined
     val = parseInt(val)
@@ -121,7 +121,7 @@ class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
     @zone.blanket.push arrow
 
 class TradeSpring.Widget.Band extends TradeSpring.Widget
-  constructor: (@zone, @color = 'black', @type, @name, @boundry_only, @slow, @annotate, @annotate_cb) ->
+  constructor: (@zone, @color = 'black', @name, @boundry_only, @slow, @annotate, @annotate_cb) ->
     @last_up = undefined
     @last_down = undefined
     @label = undefined
@@ -239,7 +239,7 @@ window.mk_debug = (zone) ->
     console.log "val", d.values
 
 class TradeSpring.Widget.Rect extends TradeSpring.Widget
-  constructor: (@zone, @color, @type, @name, @attr) ->
+  constructor: (@zone, @color, @name, @attr) ->
       @last_start = undefined
       @rx = undefined
       @lx = undefined
@@ -267,7 +267,7 @@ class TradeSpring.Widget.Rect extends TradeSpring.Widget
               @last_start = i - rect[2]
 
 class TradeSpring.Widget.Ellipse extends TradeSpring.Widget
-  constructor: (@zone, @color, @type, @name) ->
+  constructor: (@zone, @color, @name) ->
     @last_start = undefined
     @rx = undefined
     @lx = undefined
@@ -346,7 +346,7 @@ window.mk_annarrow = (zone, mul) ->
     zone.blanket.push item[0]
 
 class TradeSpring.Widget.SRLine extends TradeSpring.Widget
-  constructor: (@zone, @colors = ['black', 'blue'], @type, @name) ->
+  constructor: (@zone, @colors = ['black', 'blue'], @name) ->
     @pset = @zone.r.set()
     @eset = @zone.r.set()
     @zone.blanket.push @pset
