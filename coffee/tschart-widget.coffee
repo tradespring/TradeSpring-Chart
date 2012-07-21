@@ -17,14 +17,12 @@ class TradeSpring.Widget.Curve extends TradeSpring.Widget
     else if @curve
       off_ = @zone.offset_attr
       @curve.lineTo i * 10 + off_.translation[0], (@zone.ymax - val + off_.translation[1]) * off_.scale[1]
-      @label_pos = val
     else
       @curve = @zone.render_curve([ val ], i, @color, @name, @fast)
       @curve.node.setAttribute "class", @name
   init: (d) ->
     @curve = @zone.render_curve(d.values, d.start, @color, @name, @fast)
     @curve.node.setAttribute "class", @name
-    @label_pos = d.values.slice(-1)
 
 class TradeSpring.Widget.Bar extends TradeSpring.Widget
   constructor: (@zone, @color = 'red', @name, @fast) ->
@@ -81,7 +79,6 @@ class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
     c = @get_color(val)
     x = i * 10
     height = @base.get(i) - val
-    @label_pos = (@base.get(i) + val)/2
     bar = @zone.r.path().beginMulti().moveTo(x, @zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
       opacity: 0.6
       "stroke-width": 10
@@ -181,7 +178,6 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
         @annotate_cb()  if @annotate_cb
     @last_up = up
     @last_down = down
-    @label_pos = (@last_up + @last_down)/2
 
   init: (d) ->
     if @slow
@@ -216,7 +212,6 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
     @last_down = d.values[d.values.length - 1][1]
 
     _area.node.setAttribute "class", @name
-    @label_pos = (@last_up + @last_down)/2
 
 
 window.mk_rect = (args...) -> wrapper(TradeSpring.Widget.Rect, args)

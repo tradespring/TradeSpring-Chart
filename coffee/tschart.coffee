@@ -90,8 +90,6 @@ class TradeSpring.Chart
         @offset = @loaded_offset + @loaded_nb_items - @nb_items()
         @date_label.css "top", 5 + @x + @height
         @price_label.css "left", 5 + @x + @width
-        @indicators[name].label.text(name).css "left", 5 + @x + @width for name of @indicators
-        @indicator_groups[group].label.text(group).css "left", 5 + @x + @width for group of @indicator_groups
         @price_label_high.css "left", 5 + @x + @width
         @price_label_low.css "left", 5 + @x + @width
         $("div.yaxis-line").css(
@@ -428,19 +426,11 @@ class TradeSpring.Chart
         @indicators[name].init(d)
         widget = @indicators[name].self
         label = @indicators[name].label
-        @update_label_pos(widget, label) if widget
 
       indicator_pub: (name, d) ->
         @indicators[name].val(d)
         widget = @indicators[name].self
         label = @indicators[name].label
-        @update_label_pos(widget, label) if widget
-
-      update_label_pos: (widget, label) ->
-          pos = widget.label_pos
-          yval = widget.zone.val_to_y(pos)
-          label.get(0).price = pos
-          label.css("top", yval)
 
 class TradeSpring.Chart.Zone
       constructor: (opt)->
