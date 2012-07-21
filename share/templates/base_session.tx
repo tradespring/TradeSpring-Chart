@@ -200,7 +200,5 @@ $(function() {
 })
 </script>
 
-<script src="/static/bootstrap-modal.js"></script>
-
 </body>
 </html>
