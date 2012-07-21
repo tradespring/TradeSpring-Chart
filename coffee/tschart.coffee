@@ -392,34 +392,35 @@ class TradeSpring.Chart
 
         $(zone).bind('zone-reset', => doit())
 
-      indicator_bind_with_group: (name, zone, type, group, args...) ->
-        @indicator_bind(name, zone, type, args...)
+      indicator_bind_with_group: (group_name, zone, spec...) ->
+          for [name, type, args...] in spec
+              @indicator_bind(name, zone, type, args...)
 
-        if @indicator_groups[group]?
-            @indicator_groups[group].namelist.push name
-        else
-            labelbox = $("<label/>").addClass("checkbox").attr("id", group).css(
-                background: args.shift()
-            ).appendTo($('#indicator_group_config'))
-            $(labelbox).text(group)
-            @indicator_groups[group] = {
-                label: $("<input type='checkbox' />").val(group).attr("id", group).attr('checked', true).appendTo($(labelbox))
+              if @indicator_groups[group_name]?
+                  @indicator_groups[group_name].namelist.push name
+              else
+                  labelbox = $("<label/>").addClass("checkbox").attr("id", group_name).css(
+                      background: args.shift()
+                  ).appendTo($('#indicator_group_config'))
+                  $(labelbox).text(group_name)
+                  @indicator_groups[group_name] = {
+                      label: $("<input type='checkbox' />").val(group_name).attr("id", group_name).attr('checked', true).appendTo($(labelbox))
 
-                namelist: [name]
-            }
+                      namelist: [name]
+                  }
 
-        checkbox = 'input#' + group.replace(/([\(\)])/g, "\\$1")
-        label = @indicator_groups[group].label
-        label.change =>
-            is_show_indicator = label.attr('checked')
-            for tname in @indicator_groups[group].namelist
-                indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
-                if is_show_indicator
-                    @indicators[tname].self.is_display = true
-                    $(indicator_spec).show()
-                else
-                    @indicators[tname].self.is_display = false
-                    $(indicator_spec).hide()
+                  checkbox = 'input#' + group_name.replace(/([\(\)])/g, "\\$1")
+                  label = @indicator_groups[group_name].label
+                  label.change =>
+                      is_show_indicator = label.attr('checked')
+                      for tname in @indicator_groups[group_name].namelist
+                          indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+                          if is_show_indicator
+                              @indicators[tname].self.is_display = true
+                              $(indicator_spec).show()
+                          else
+                              @indicators[tname].self.is_display = false
+                              $(indicator_spec).hide()
 
       indicator_names: ->
         name for name of @indicators
