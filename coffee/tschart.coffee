@@ -16,7 +16,6 @@ class TradeSpring.Chart
         @zones = []
         @indicators = {}
         @indicator_groups ?= {}
-        @group_count = 0
         @current_zoom = 10
         @canvas_width = 10 * @items_to_load
         @chart_view = $("<div>").css(
@@ -402,30 +401,26 @@ class TradeSpring.Chart
         if @indicator_groups[group]?
             @indicator_groups[group].namelist.push name
         else
-            @group_count++
-            labelbox = $("<label/>").addClass("checkbox").appendTo($('.modal-body'))
+            labelbox = $("<label/>").addClass("checkbox").attr("id", group).css(
+                background: args.shift()
+            ).appendTo($('#indicator_group_config'))
             $(labelbox).text(group)
             @indicator_groups[group] = {
-                label: $("<input type='checkbox' />").css(
-                    background: args.shift()
-                ).appendTo($(labelbox))
+                label: $("<input type='checkbox' />").val(group).attr("id", group).attr('checked', true).appendTo($(labelbox))
 
                 namelist: [name]
             }
 
-        that = this
-        @indicator_groups[group].label.toggle(
-            ->
-                that.indicator_groups[group].label.checked = false
-                for tname in that.indicator_groups[group].namelist
-                    indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
-                    $(indicator_spec).hide()
-            ->
-                that.indicator_groups[group].label.checked = true
-                for tname in that.indicator_groups[group].namelist
-                    indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+        checkbox = 'input#' + group.replace(/([\(\)])/g, "\\$1")
+        label = @indicator_groups[group].label
+        label.change =>
+            is_show_indicator = label.attr('checked')
+            for tname in @indicator_groups[group].namelist
+                indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+                if is_show_indicator
                     $(indicator_spec).show()
-        )
+                else
+                    $(indicator_spec).hide()
 
       indicator_names: ->
         name for name of @indicators
