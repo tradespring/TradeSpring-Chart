@@ -34,7 +34,6 @@ requires 'methods';
 requires 'TradeSpring';
 requires 'TradeSpring::Broker';
 
-auto_include_deps;
 extra_tests;
 auto_set_repository;
 install_share;
