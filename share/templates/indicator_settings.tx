@@ -5,11 +5,6 @@
     <h2>Indicator Group</h2>
   </div>
 
-  <div class="modal-body" id="indicator_config">
-    <h3>Indicator</h3>
-  </div>
-  <hr/>
-
   <div class="modal-body" id="indicator_group_config">
     <h3>Indicator Group</h3>
   </div>

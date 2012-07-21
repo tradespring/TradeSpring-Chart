@@ -375,20 +375,6 @@ class TradeSpring.Chart
         doit = =>
           @indicators[name] = new TradeSpring.Widget[type](zone, arg0, name, args...)
         doit()
-
-        labelbox = $("<label/>").addClass("checkbox").attr("id", name).css(
-            background: arg0
-        ).appendTo($('#indicator_config'))
-        $(labelbox).text(name)
-        @indicators[name].label = $("<input type='checkbox' />").val(name).attr("id", name).attr('checked', true).appendTo($(labelbox))
-
-        indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
-        @indicators[name].label.change ->
-            if $(@).attr('checked')
-                $(indicator_spec).show()
-            else
-                $(indicator_spec).hide()
-
         $(zone).bind('zone-reset', => doit())
 
       indicator_bind_with_group: (group_name, zone, spec...) ->
