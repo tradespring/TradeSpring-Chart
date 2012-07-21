@@ -381,20 +381,18 @@ class TradeSpring.Chart
           @indicators[name] = window[cb].apply(this, [zone, arg0, type, name].concat(args))
         doit();
 
-        @indicators[name].label = $("<span/>").addClass("ylabel").css(
-          position: "absolute"
-          left: 5 + @x + @width
-          top: 0
-          background: arg0
-        ).appendTo(@holder)
+        labelbox = $("<label/>").addClass("checkbox").attr("id", name).css(
+            background: arg0
+        ).appendTo($('#indicator_config'))
+        $(labelbox).text(name)
+        @indicators[name].label = $("<input type='checkbox' />").val(name).attr("id", name).attr('checked', true).appendTo($(labelbox))
 
         indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
-        @indicators[name].label.toggle(
-            ->
-                $(indicator_spec).hide()
-            ->
+        @indicators[name].label.change ->
+            if $(@).attr('checked')
                 $(indicator_spec).show()
-        )
+            else
+                $(indicator_spec).hide()
 
         $(zone).bind('zone-reset', => doit());
 
