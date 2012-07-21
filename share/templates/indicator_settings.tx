@@ -1,4 +1,4 @@
-<div class="modal" id="IndicatorSettings">
+<div class="modal hide" id="IndicatorSettings">
 
   <div class="modal-header">
     <button class="close" data-dismiss="modal">×</button>

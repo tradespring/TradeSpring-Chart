@@ -9,7 +9,6 @@ exports.VOLUME = 5
 
 class TradeSpring.Chart
       constructor: (opt)->
-        $('#IndicatorSettings').hide()
         for name, val of opt
           @[name] = val
         @tz ||= 'Asia/Taipei'
