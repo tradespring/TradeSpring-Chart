@@ -373,11 +373,11 @@ class TradeSpring.Chart
         @on_view_change()
 
       indicator_bind: (name, zone, type, args...) ->
-        cb = "mk_" + type.toLowerCase();
+        cb = "mk_" + type.toLowerCase()
         arg0 = args.shift()
         doit = =>
           @indicators[name] = window[cb].apply(this, [zone, arg0, name].concat(args))
-        doit();
+        doit()
 
         labelbox = $("<label/>").addClass("checkbox").attr("id", name).css(
             background: arg0
@@ -392,7 +392,7 @@ class TradeSpring.Chart
             else
                 $(indicator_spec).hide()
 
-        $(zone).bind('zone-reset', => doit());
+        $(zone).bind('zone-reset', => doit())
 
       indicator_bind_with_group: (name, zone, type, group, args...) ->
         @indicator_bind(name, zone, type, args...)
@@ -487,7 +487,7 @@ class TradeSpring.Chart.Zone
           $("span.ylabel.yaxis").remove()
           @ylabels = null
         =>
-          $(@).trigger('zone-reset');
+          $(@).trigger('zone-reset')
           oldblanket.hide()
           oldblanket.remove()
 
@@ -763,7 +763,7 @@ class TradeSpring.Chart.Zone
             'margin-left': -@view.width
           ).addClass("yaxis-line").appendTo(label)
 
-          @ylabels[val] = label;
+          @ylabels[val] = label
 
         that = this
         $("span.ylabel").each ->

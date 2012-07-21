@@ -116,7 +116,7 @@ class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
       x: i
       y: price
       direction: val,
-      c: @color);
+      c: @color)
     arrow.node.setAttribute "class", @name
     @zone.blanket.push arrow
 
@@ -147,7 +147,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
 
     if @pointer
       @pointer.attr('path', p.attr('path')).toBack()
-      p.remove();
+      p.remove()
     else
       @pointer = p.attr(
         "stroke-width": "0.0"
