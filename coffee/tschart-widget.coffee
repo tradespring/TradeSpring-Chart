@@ -4,7 +4,6 @@ exports = @TradeSpring
 class TradeSpring.Widget
   constructor: (@zone) ->
       @is_display = true
-      @self = @
   init: (d) ->
     @render_item v, d.start + parseInt(i) for i, v of d.values
 
@@ -83,7 +82,7 @@ class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
 class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
   constructor: (@zone, @color = 'orange', @name, @base) ->
     super
-    @base = zone.view.indicators[@base].self
+    @base = zone.view.indicators[@base]
   render_item: (val, i) ->
     val = parseFloat(val)
     return if (isNaN(val))

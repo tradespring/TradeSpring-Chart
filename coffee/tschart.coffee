@@ -416,10 +416,10 @@ class TradeSpring.Chart
                       for tname in @indicator_groups[group_name].namelist
                           indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
                           if is_show_indicator
-                              @indicators[tname].self.is_display = true
+                              @indicators[tname].is_display = true
                               $(indicator_spec).show()
                           else
-                              @indicators[tname].self.is_display = false
+                              @indicators[tname].is_display = false
                               $(indicator_spec).hide()
 
       indicator_names: ->
@@ -427,12 +427,12 @@ class TradeSpring.Chart
 
       indicator_init: (name, d) ->
         @indicators[name].init(d)
-        widget = @indicators[name].self
+        widget = @indicators[name]
         label = @indicators[name].label
 
       indicator_pub: (name, d) ->
         @indicators[name].val(d)
-        widget = @indicators[name].self
+        widget = @indicators[name]
         label = @indicators[name].label
 
 class TradeSpring.Chart.Zone
