@@ -371,7 +371,6 @@ class TradeSpring.Chart
         @on_view_change()
 
       indicator_bind: (name, zone, type, args...) ->
-        cb = "mk_" + type.toLowerCase()
         arg0 = args.shift()
         doit = =>
           @indicators[name] = new TradeSpring.Widget[type](zone, arg0, name, args...)

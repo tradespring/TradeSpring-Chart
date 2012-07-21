@@ -102,15 +102,6 @@ class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
   val: (d) ->
     @render_item d.value, d.i
 
-wrapper = (klass, args) ->
-  c = Object.create(klass.prototype)
-  klass.apply(c, args)
-  init: (d) ->
-    c.init(d)
-  val: (d) ->
-    c.val(d)
-  self: c
-
 class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
   constructor: (@zone, @color = 'black', @name) ->
     super
@@ -229,19 +220,6 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
     @last_down = d.values[d.values.length - 1][1]
 
     _area.node.setAttribute "class", @name
-
-
-window.mk_rect = (args...) -> wrapper(TradeSpring.Widget.Rect, args)
-window.mk_ellipse = (args...) -> wrapper(TradeSpring.Widget.Ellipse, args)
-window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
-window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
-window.mk_candlebody = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
-window.mk_candlebackgroundbase = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
-window.mk_candlebackground = (args...) -> wrapper(TradeSpring.Widget.CandleBackground, args)
-window.mk_band = (args...) -> wrapper(TradeSpring.Widget.Band, args)
-window.mk_signalarrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
-window.mk_srline = (args...) -> wrapper(TradeSpring.Widget.SRLine, args)
-
 
 window.mk_debug = (zone) ->
   init: (d) ->
