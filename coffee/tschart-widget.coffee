@@ -2,7 +2,7 @@
 exports = @TradeSpring
 
 class TradeSpring.Widget
-  constructor: (@zone) ->
+  constructor: (@zone, @name) ->
   init: (d) ->
     @render_item v, d.start + parseInt(i) for i, v of d.values
 
@@ -19,9 +19,10 @@ class TradeSpring.Widget.Curve extends TradeSpring.Widget
       @curve.lineTo i * 10 + off_.translation[0], (@zone.ymax - val + off_.translation[1]) * off_.scale[1]
     else
       @curve = @zone.render_curve([ val ], i, @color, @name, @fast)
+      @curve.node.setAttribute "class", @name
   init: (d) ->
     @curve = @zone.render_curve(d.values, d.start, @color, @name, @fast)
-    @curve.node.setAttribute "class", "curve"
+    @curve.node.setAttribute "class", @name
 
 class TradeSpring.Widget.Bar extends TradeSpring.Widget
   constructor: (@zone, @color = 'red', @name, @fast) ->
@@ -36,13 +37,15 @@ class TradeSpring.Widget.Bar extends TradeSpring.Widget
       @zone._callbacks[idx][i - @zone.view.loaded_offset] = cb
     else
       @bar = 1
+      @bar.node.setAttribute "class", @name
       @zone.render_bar [ val ], i, null, @name, 0, 0, @fast
   init: (d) ->
     @bar = 1
+    @bar.node.setAttribute "class", @name
     @zone.render_bar d.values, d.start, @color, @name, 0, 0, @fast
 
 class TradeSpring.Widget.CandleBody extends TradeSpring.Widget
-  constructor: (@zone, @color = 'red') ->
+  constructor: (@zone, @color = 'red', @name) ->
   render_item: (val, i) ->
     data = @zone.data_set[i - @zone.view.loaded_offset]
     val = parseInt(val)
@@ -54,19 +57,39 @@ class TradeSpring.Widget.CandleBody extends TradeSpring.Widget
       "stroke-width": width
       stroke: c
     ).attr(@zone.offset_attr)
+    bar.node.setAttribute "class", @name
     @zone.blanket.push bar
   get_color: (val) ->
     (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
 
-
-
 class TradeSpring.Widget.CandleBackgroundBase extends TradeSpring.Widget
-  constructor: (@zone) ->
+  constructor: (@zone, @name) ->
     @data = {}
   render_item: (val, i) ->
     @data[i - @zone.view.loaded_offset] = val
   get: (i) ->
     @data[i - @zone.view.loaded_offset]
+
+class TradeSpring.Widget.CandleBackground extends TradeSpring.Widget
+  constructor: (@zone, @color = 'orange', @name, @base) ->
+    @base = zone.view.indicators[@base].self
+  render_item: (val, i) ->
+    val = parseFloat(val)
+    return if (isNaN(val))
+    c = @get_color(val)
+    x = i * 10
+    height = @base.get(i) - val
+    bar = @zone.r.path().beginMulti().moveTo(x, @zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
+      opacity: 0.6
+      "stroke-width": 10
+      stroke: (if height > 0 then "green" else "red")
+    ).attr(@zone.offset_attr).toBack()
+    bar.node.setAttribute "class", @name
+    @zone.blanket.push bar
+  get_color: (val) ->
+    (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
+  val: (d) ->
+    @render_item d.value, d.i
 
 wrapper = (klass, args) ->
   c = Object.create(klass.prototype)
@@ -78,7 +101,7 @@ wrapper = (klass, args) ->
   self: c
 
 class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
-  constructor: (@zone, @color = 'black') ->
+  constructor: (@zone, @color = 'black', @name) ->
   render_item: (val, i) ->
     price = undefined
     val = parseInt(val)
@@ -90,7 +113,8 @@ class TradeSpring.Widget.SignalArrow extends TradeSpring.Widget
       x: i
       y: price
       direction: val,
-      c: @color);
+      c: @color)
+    arrow.node.setAttribute "class", @name
     @zone.blanket.push arrow
 
 class TradeSpring.Widget.Band extends TradeSpring.Widget
@@ -120,7 +144,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
 
     if @pointer
       @pointer.attr('path', p.attr('path')).toBack()
-      p.remove();
+      p.remove()
     else
       @pointer = p.attr(
         "stroke-width": "0.0"
@@ -128,6 +152,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
         stroke: "none"
         "fill-opacity": 0.5
       ).toBack()
+      @pointer.node.setAttribute "class", @name
 
     xstart = i - if @last_up and @last_down then 1 else 0.5
     a = @zone.path([ [ "M", xstart * 10, ymax - @last_up ], [ "L", (i) * 10, ymax - up ], [ "L", (i) * 10, ymax - down ], [ "L", xstart * 10, ymax - @last_down ], [ "z" ] ]).attr(
@@ -136,6 +161,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
       stroke: "none"
       "fill-opacity": 0.5
     ).toBack()
+    a.node.setAttribute "class", @name
     @zone.blanket.push a
     if @annotate
       text = Math.round(down) + " - " + Math.round(up)
@@ -147,6 +173,7 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
           "text-anchor": "left"
         ).toBack()
         @label.translate -$(@label.node).width() / 2
+        @label.node.setAttribute "class", @name
         @zone.blanket.push @label
         @annotate_cb()  if @annotate_cb
     @last_up = up
@@ -184,12 +211,16 @@ class TradeSpring.Widget.Band extends TradeSpring.Widget
     @last_up = d.values[d.values.length - 1][0]
     @last_down = d.values[d.values.length - 1][1]
 
+    _area.node.setAttribute "class", @name
 
 
+window.mk_rect = (args...) -> wrapper(TradeSpring.Widget.Rect, args)
+window.mk_ellipse = (args...) -> wrapper(TradeSpring.Widget.Ellipse, args)
 window.mk_curve = (args...) -> wrapper(TradeSpring.Widget.Curve, args)
 window.mk_bar   = (args...) -> wrapper(TradeSpring.Widget.Bar, args)
 window.mk_candlebody = (args...) -> wrapper(TradeSpring.Widget.CandleBody, args)
 window.mk_candlebackgroundbase = (args...) -> wrapper(TradeSpring.Widget.CandleBackgroundBase, args)
+window.mk_candlebackground = (args...) -> wrapper(TradeSpring.Widget.CandleBackground, args)
 window.mk_band = (args...) -> wrapper(TradeSpring.Widget.Band, args)
 window.mk_signalarrow = (args...) -> wrapper(TradeSpring.Widget.SignalArrow, args)
 window.mk_srline = (args...) -> wrapper(TradeSpring.Widget.SRLine, args)
@@ -202,70 +233,60 @@ window.mk_debug = (zone) ->
   val: (d) ->
     console.log "val", d.values
 
-window.mk_rect = (zone, color, name, attr) ->
-  last_start = undefined
-  rx = undefined
-  lx = undefined
-  us = zone.r.set()
-  ob = zone.blanket
-  ob.push us
-  render_item = (rect, i) ->
-    if rx and last_start == i - rect[2]
-      us.pop()
-      rx.remove()
-      lx.remove()
-    rx = zone.rect(10 * (i - rect[2]) - 5, rect[0], rect[2] * 10 + 10, rect[0] - rect[1]).attr(
-      "stroke-width": 2
-      stroke: color
-    )
-    lx = zone.r.path().moveTo(10 * (i - rect[2]) - 10, zone.ymax - (parseInt(rect[0]) + parseInt(rect[1])) / 2).relatively().lineTo(rect[2] * 10 + 20, 0).attr(
-      "stroke-width": 1
-      stroke: "gray"
-    ).attr(zone.offset_attr)
-    if attr
-      rx.attr attr
-      lx.attr attr
-    us.push rx
-    us.push lx
-    last_start = i - rect[2]
-  init: (d) ->
-    jQuery(d.values).each (idx) ->
-      render_item this, d.start + idx  if this? and this[0]?
+class TradeSpring.Widget.Rect extends TradeSpring.Widget
+  constructor: (@zone, @color, @name, @attr) ->
+      @last_start = undefined
+      @rx = undefined
+      @lx = undefined
+      @us = @zone.r.set()
+      ob = @zone.blanket
+      ob.push @us
+  render_item: (rect, i) ->
+      if @rx and @last_start == i - rect[2]
+          @us.pop()
+          @rx.remove()
+          @lx.remove()
+          @rx = @zone.rect(10 * (i - rect[2]) - 5, rect[0], rect[2] * 10 + 10, rect[0] - rect[1]).attr(
+              "stroke-width": 2
+              stroke: @color
+          )
+          @lx = @zone.r.path().moveTo(10 * (i - rect[2]) - 10, @zone.ymax - (parseInt(rect[0]) + parseInt(rect[1])) / 2).relatively().lineTo(rect[2] * 10 + 20, 0).attr(
+              "stroke-width": 1
+              stroke: "gray"
+          ).attr(@zone.offset_attr)
+          if attr
+              @rx.attr attr
+              @lx.attr attr
+              @us.push @rx
+              @us.push @lx
+              @last_start = i - rect[2]
 
-  val: (d) ->
-    render_item d.value, d.i  if d.value? and d.value[0]?
-
-window.mk_ellipse = (zone, color, name) ->
-  last_start = undefined
-  rx = undefined
-  lx = undefined
-  us = zone.r.set()
-  zone.blanket.push us
-  render_item = (spec, i) ->
-    if rx and last_start == i - spec[2]
-      us.pop()
-      rx.remove()
-      lx.remove()
+class TradeSpring.Widget.Ellipse extends TradeSpring.Widget
+  constructor: (@zone, @color, @name) ->
+    @last_start = undefined
+    @rx = undefined
+    @lx = undefined
+    @us = @zone.r.set()
+    @zone.blanket.push @us
+  render_item: (spec, i) ->
+    if @rx and @last_start == i - spec[2]
+      @us.pop()
+      @rx.remove()
+      @lx.remove()
     h = parseFloat(spec[0])
     l = parseFloat(spec[1])
-    rx = zone.ellipse(10 * (i - spec[2] / 2), (h + l) / 2, (spec[2] / 2) * 10, (h - l) / 2).attr(
+    @rx = @zone.ellipse(10 * (i - spec[2] / 2), (h + l) / 2, (spec[2] / 2) * 10, (h - l) / 2).attr(
       "stroke-width": 2
-      stroke: color
+      stroke: @color
     )
-    lx = zone.rect(10 * (i - spec[2]) - 10, (parseInt(spec[0]) + parseInt(spec[1])) / 2, spec[2] * 10 + 20, 0.5).attr(
+    @lx = @zone.rect(10 * (i - spec[2]) - 10, (parseInt(spec[0]) + parseInt(spec[1])) / 2, spec[2] * 10 + 20, 0.5).attr(
       "stroke-width": 1
       stroke: "gray"
       fill: "gray"
     )
-    us.push rx
-    us.push lx
-    last_start = i - spec[2]
-  init: (d) ->
-    jQuery(d.values).each (idx) ->
-      render_item this, d.start + idx  if this? and this[0]?
-
-  val: (d) ->
-    render_item d.value, d.i  if d.value? and d.value[0]?
+    @us.push @rx
+    @us.push @lx
+    @last_start = i - spec[2]
 
 window.mk_colorheat = (zone, mul) ->
   get_color = (val) ->
@@ -320,7 +341,7 @@ window.mk_annarrow = (zone, mul) ->
     zone.blanket.push item[0]
 
 class TradeSpring.Widget.SRLine extends TradeSpring.Widget
-  constructor: (@zone, @colors = ['black', 'blue']) ->
+  constructor: (@zone, @colors = ['black', 'blue'], @name) ->
     @pset = @zone.r.set()
     @eset = @zone.r.set()
     @zone.blanket.push @pset
@@ -388,26 +409,3 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
     @pset.push @px
     @last_price = price
     @last_dir = dir
-
-window.mk_candlebackground = (zone, color, name, base) ->
-  base = zone.view.indicators[base].self
-  render_item = (val, i) ->
-    val = parseFloat(val)
-    c = get_color(val)
-    x = i * 10
-    height = base.get(i) - val
-    bar = zone.r.path().beginMulti().moveTo(x, zone.ymax - val).relatively().lineTo(0, -height).andUpdate().attr(
-      opacity: 0.6
-      "stroke-width": 10
-      stroke: (if height > 0 then "green" else "red")
-    ).attr(zone.offset_attr).toBack()
-    zone.blanket.push bar
-  get_color = (val) ->
-    (if val > 0 then "red" else (if val < 0 then "green" else "yellow"))
-
-  init: (d) ->
-    $(d.values).each (idx) ->
-      render_item this, d.start + idx  if this?
-
-  val: (d) ->
-    render_item d.value, d.i

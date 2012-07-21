@@ -17,6 +17,7 @@ sub files {
        jquery.cookie.js jquery.hotkeys.js
        jquery.dataTables.js jquery.ui.js
        jquery.contextMenu.js
+       bootstrap-modal.js
        gen/tschart.js gen/tsdraw.js
        gen/tsorder.js gen/tschart-ui.js gen/tschart-widget.js );
 }

@@ -14,6 +14,7 @@ class TradeSpring.Chart
         @tz ||= 'Asia/Taipei'
         @zones = []
         @indicators = {}
+        @indicator_groups ?= {}
         @current_zoom = 10
         @canvas_width = 10 * @items_to_load
         @chart_view = $("<div>").css(
@@ -58,6 +59,11 @@ class TradeSpring.Chart
         @loaded_nb_items = @items_to_load
         @loaded_offset = @cnt - @items_to_load
 
+        @date_label = $("<span/>").addClass("xlabel").addClass("cursor").css(
+          position: "absolute"
+          top: 5 + @x + @height
+        ).appendTo(@holder)
+
         @price_label = $("<span/>").addClass("ylabel").addClass("cursor").css(
           position: "absolute"
           left: 5 + @x + @width
@@ -82,6 +88,7 @@ class TradeSpring.Chart
         @chart_view.css "width", @width
         @canvas.css "left", @nb_items() * @current_zoom - @canvas_width * @current_zoom / 10
         @offset = @loaded_offset + @loaded_nb_items - @nb_items()
+        @date_label.css "top", 5 + @x + @height
         @price_label.css "left", 5 + @x + @width
         @price_label_high.css "left", 5 + @x + @width
         @price_label_low.css "left", 5 + @x + @width
@@ -196,9 +203,16 @@ class TradeSpring.Chart
               e = e.originalEvent.touches[0]  if e.originalEvent.touches
               return true if !e
               scaled_y = e.pageY - zone.canvas_holder.offset().top
+              scaled_x = e.pageX - zone.canvas_holder.offset().left
               offY = scaled_y / zone.nr_yscale - zone.nr_offset
+              offX = e.pageX - @canvas.offset().left
+              x = Math.floor(offX / @current_zoom + 0.5)
               hcursor.css "top", scaled_y
               y = @candle_zone.offset_to_val(offY)
+
+              if @candle_zone.data_set? && @candle_zone.data_set[x]?
+                  datetime = @candle_zone.data_set[x][0]
+                  @date_label.text(datetime).css left: e.pageX
               @price_label.text(y).css top: scaled_y
               true
 
@@ -357,22 +371,66 @@ class TradeSpring.Chart
         @on_view_change()
 
       indicator_bind: (name, zone, type, args...) ->
-        cb = "mk_" + type.toLowerCase();
+        cb = "mk_" + type.toLowerCase()
         arg0 = args.shift()
         doit = =>
           @indicators[name] = window[cb].apply(this, [zone, arg0, name].concat(args))
-        doit();
-        $(zone).bind('zone-reset', => doit());
+        doit()
 
+        labelbox = $("<label/>").addClass("checkbox").attr("id", name).css(
+            background: arg0
+        ).appendTo($('#indicator_config'))
+        $(labelbox).text(name)
+        @indicators[name].label = $("<input type='checkbox' />").val(name).attr("id", name).attr('checked', true).appendTo($(labelbox))
+
+        indicator_spec = 'path.' + name.replace(/([\(\)])/g, "\\$1")
+        @indicators[name].label.change ->
+            if $(@).attr('checked')
+                $(indicator_spec).show()
+            else
+                $(indicator_spec).hide()
+
+        $(zone).bind('zone-reset', => doit())
+
+      indicator_bind_with_group: (name, zone, type, group, args...) ->
+        @indicator_bind(name, zone, type, args...)
+
+        if @indicator_groups[group]?
+            @indicator_groups[group].namelist.push name
+        else
+            labelbox = $("<label/>").addClass("checkbox").attr("id", group).css(
+                background: args.shift()
+            ).appendTo($('#indicator_group_config'))
+            $(labelbox).text(group)
+            @indicator_groups[group] = {
+                label: $("<input type='checkbox' />").val(group).attr("id", group).attr('checked', true).appendTo($(labelbox))
+
+                namelist: [name]
+            }
+
+        checkbox = 'input#' + group.replace(/([\(\)])/g, "\\$1")
+        label = @indicator_groups[group].label
+        label.change =>
+            is_show_indicator = label.attr('checked')
+            for tname in @indicator_groups[group].namelist
+                indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+                if is_show_indicator
+                    $(indicator_spec).show()
+                else
+                    $(indicator_spec).hide()
 
       indicator_names: ->
         name for name of @indicators
 
       indicator_init: (name, d) ->
         @indicators[name].init(d)
+        widget = @indicators[name].self
+        label = @indicators[name].label
 
       indicator_pub: (name, d) ->
         @indicators[name].val(d)
+        widget = @indicators[name].self
+        label = @indicators[name].label
 
 class TradeSpring.Chart.Zone
       constructor: (opt)->
@@ -419,7 +477,7 @@ class TradeSpring.Chart.Zone
           $("span.ylabel.yaxis").remove()
           @ylabels = null
         =>
-          $(@).trigger('zone-reset');
+          $(@).trigger('zone-reset')
           oldblanket.hide()
           oldblanket.remove()
 
@@ -695,7 +753,7 @@ class TradeSpring.Chart.Zone
             'margin-left': -@view.width
           ).addClass("yaxis-line").appendTo(label)
 
-          @ylabels[val] = label;
+          @ylabels[val] = label
 
         that = this
         $("span.ylabel").each ->

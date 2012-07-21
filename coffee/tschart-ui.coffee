@@ -51,8 +51,8 @@ class TradeSpring.ChartUI
           view.init_width()
           view.on_view_change()
 
-        h.prev = d.start_price;
-        $('.prev', h).text(d.start_price);
+        h.prev = d.start_price
+        $('.prev', h).text(d.start_price)
 
 
   @init_connection_status = (hpipe) ->
@@ -86,12 +86,12 @@ class TradeSpring.ChartUI
   @set_day_low = (h, day_low, view) ->
         if !h.day_low  || day_low  < h.day_low
           h.day_low = day_low
-          $('.low', h).text(day_low);
+          $('.low', h).text(day_low)
           view.price_label_low.text(day_low).css('top', view.candle_zone.val_to_y(day_low))
 
   @init_live_events = (view, hpipe, h) ->
         $(hpipe).bind("message.tick", (e, d) =>
-                view.on_new_event(d);
+                view.on_new_event(d)
                 if h
                   change = d.prices[CLOSE] - h.prev
                   h.last = d.prices[CLOSE]

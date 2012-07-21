@@ -15,8 +15,9 @@
 
 <link rel="stylesheet" href="/static/screen.css" type="text/css" />
 % block css -> {
-<link rel="stylesheet" href="/static/tschart.css" type="text/css" />
+<link rel="stylesheet" href="/static/gen/tschart.css" type="text/css" />
 <link href="/static/jquery.alerts.css" rel="stylesheet" type="text/css" media="screen" />
+<link rel="stylesheet" href="/static/bootstrap.css" type="text/css" />
 % }
 
 <script type="text/javascript">
@@ -38,7 +39,9 @@ $(function() {
         var zone  = view.new_zone({ y:  0,  height: 420});
         var zone2 = view.new_zone({ y: 430, height: 70});
 
-        view.indicator_bind('SMA(9)', zone, 'Curve', 'orange');
+        view.indicator_bind_with_group('SMA(9)', zone, 'Curve', 'MA', 'orange');
+        view.indicator_bind_with_group('SMA(15)', zone, 'Curve', 'MA', 'yellow');
+        view.indicator_bind_with_group('SMA(30)', zone, 'Curve', 'MA', 'blue');
 %}
 
         $(window).resize(function() {
@@ -182,7 +185,9 @@ Connecting...
 <input id="date" type="date">
 <input id="go" type="button" value="go">
 <input id="end" type="button" value=">>>>|">
+<a class="btn" data-toggle="modal" href="#IndicatorSettings" >Settings</a>
 % }
+% include 'indicator_settings.tx'
 
 % if $order {
 % include 'order-init.tx'

@@ -7,6 +7,10 @@ author   q{Chia-liang Kao <clkao@clkao.org>};
 license  'perl';
 
 build_requires 'Test::More';
+build_requires 'Class::Load';
+build_requires 'Redis::hiredis';
+build_requires 'Graph';
+build_requires 'Number::Extreme';
 
 requires 'Try::Tiny';
 requires 'Plack';
@@ -36,14 +40,16 @@ auto_set_repository;
 install_share;
 
 clean_files "share/static/gen/*.js";
+clean_files "share/static/gen/*.sass";
 
 WriteAll;
 
 sub MY::postamble {
     return <<'MAKE_FRAG';
-all:: buildjs
+all:: build_css_and_jss
 
-buildjs:
+build_css_and_jss:
 	$(PERL) utils/build.pl
+
 MAKE_FRAG
 }
