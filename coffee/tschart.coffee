@@ -398,15 +398,16 @@ class TradeSpring.Chart
                   label.change =>
                       is_show_indicator = label.attr('checked')
                       for tname in @indicator_groups[group_name].namelist
+                          indicator = @indicators[tname]
                           indicator_spec = '.' + tname.replace(/([\(\)])/g, "\\$1")
                           if is_show_indicator
-                              @indicators[tname].is_display = true
-                              @indicators[tname].show() if @indicators[tname].show
-                              $(indicator_spec).show()
+                              indicator.is_display = true
+                              indicator.show() if indicator.show
+                              $(indicator_spec, indicator.zone.canvas_holder).show()
                           else
-                              @indicators[tname].is_display = false
-                              @indicators[tname].hide() if @indicators[tname].hide
-                              $(indicator_spec).hide()
+                              indicator.is_display = false
+                              indicator.hide() if indicator.hide
+                              $(indicator_spec, indicator.zone.canvas_holder).hide()
 
       indicator_names: ->
         name for name of @indicators
