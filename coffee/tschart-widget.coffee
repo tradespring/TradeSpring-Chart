@@ -238,24 +238,33 @@ class TradeSpring.Widget.Rect extends TradeSpring.Widget
       ob = @zone.blanket
       ob.push @us
   render_item: (rect, i) ->
+      return unless rect? and rect[0]
       if @rx and @last_start == i - rect[2]
           @us.pop()
           @rx.remove()
           @lx.remove()
-          @rx = @zone.rect(10 * (i - rect[2]) - 5, rect[0], rect[2] * 10 + 10, rect[0] - rect[1]).attr(
-              "stroke-width": 2
-              stroke: @color
-          )
-          @lx = @zone.r.path().moveTo(10 * (i - rect[2]) - 10, @zone.ymax - (parseInt(rect[0]) + parseInt(rect[1])) / 2).relatively().lineTo(rect[2] * 10 + 20, 0).attr(
-              "stroke-width": 1
-              stroke: "gray"
-          ).attr(@zone.offset_attr)
-          if attr
-              @rx.attr attr
-              @lx.attr attr
-              @us.push @rx
-              @us.push @lx
-              @last_start = i - rect[2]
+      @rx = @zone.rect(10 * (i - rect[2]) - 5, rect[0], rect[2] * 10 + 10, rect[0] - rect[1]).attr(
+          "stroke-width": 2
+          stroke: @color
+      )
+      @lx = @zone.r.path().moveTo(10 * (i - rect[2]) - 10, @zone.ymax - (parseInt(rect[0]) + parseInt(rect[1])) / 2).relatively().lineTo(rect[2] * 10 + 20, 0).attr(
+          "stroke-width": 1
+          stroke: "gray"
+      ).attr(@zone.offset_attr)
+      if @attr
+          @rx.attr @attr
+          @lx.attr @attr
+      @us.push @rx
+      @us.push @lx
+      unless @is_display
+          $(@rx.node).hide()
+          $(@lx.node).hide()
+      @last_start = i - rect[2]
+  hide: ->
+      @us.hide()
+  show: ->
+      @us.show()
+
 
 class TradeSpring.Widget.Ellipse extends TradeSpring.Widget
   constructor: (@zone, @color, @name) ->
