@@ -398,7 +398,7 @@ class TradeSpring.Chart
                   label.change =>
                       is_show_indicator = label.attr('checked')
                       for tname in @indicator_groups[group_name].namelist
-                          indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
+                          indicator_spec = '.' + tname.replace(/([\(\)])/g, "\\$1")
                           if is_show_indicator
                               @indicators[tname].is_display = true
                               @indicators[tname].show() if @indicators[tname].show
