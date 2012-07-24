@@ -364,7 +364,7 @@ class TradeSpring.Order
 
             start: (ev) ->
               view.view_lock_decrease = 1
-              start_price = o.price
+              start_price = idmap[id].order.price
               label.addClass "pending"
               cancel.hide()
 
