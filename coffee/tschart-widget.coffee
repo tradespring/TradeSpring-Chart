@@ -394,7 +394,7 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
         stroke: c
         "stroke-dasharray": "--"
       ).attr(@zone.offset_attr)
-      entry.node.setAttribute "class", "curve"
+      entry.node.setAttribute "class", @name
       $(entry.node).hide() unless @is_display
       @ex = entry
       @eset.push @ex
@@ -412,7 +412,7 @@ class TradeSpring.Widget.SRLine extends TradeSpring.Widget
       "stroke-width": 2
       stroke: c
     ).attr @zone.offset_attr
-    step.node.setAttribute "class", "curve"
+    step.node.setAttribute "class", @name
     $(step.node).hide() unless @is_display
     @px = step
     @pset.push @px
