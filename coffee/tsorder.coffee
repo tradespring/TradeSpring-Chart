@@ -25,9 +25,8 @@ class TradeSpring.OrderUI
             return
           new_pipe = undefined
           unless b.pipe
-            b.pipe = new Hippie.Pipe
-            b.pipe.args = new_broker
-            b.pipe.init host: b.hphost
+            b.pipe = new Hippie.Pipe host: b.hphost, arg: new_broker
+            b.pipe.init()
             new_pipe = 1
           b.torder = new TradeSpring.Order(b.pipe, _view, _tradetable)
           b.torder.reinit()  unless new_pipe
