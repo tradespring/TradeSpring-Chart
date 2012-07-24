@@ -394,7 +394,6 @@ class TradeSpring.Chart
                       namelist: [name]
                   }
 
-                  checkbox = 'input#' + group_name.replace(/([\(\)])/g, "\\$1")
                   label = @indicator_groups[group_name].label
                   label.change =>
                       is_show_indicator = label.attr('checked')
