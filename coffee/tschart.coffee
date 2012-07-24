@@ -402,9 +402,11 @@ class TradeSpring.Chart
                           indicator_spec = 'path.' + tname.replace(/([\(\)])/g, "\\$1")
                           if is_show_indicator
                               @indicators[tname].is_display = true
+                              @indicators[tname].show() if @indicators[tname].show
                               $(indicator_spec).show()
                           else
                               @indicators[tname].is_display = false
+                              @indicators[tname].hide() if @indicators[tname].hide
                               $(indicator_spec).hide()
 
       indicator_names: ->
